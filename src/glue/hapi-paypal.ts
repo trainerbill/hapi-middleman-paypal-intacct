@@ -9,11 +9,6 @@ export const hapiPayPalOptions: IHapiPayPalOptions = {
     routes: [
         {
             config: {
-                id: "paypal_webhooks_test",
-            },
-        },
-        {
-            config: {
                 id: "paypal_webhooks_listen",
             },
             handler: async (request, reply, error, response) => {
