@@ -60,7 +60,7 @@ export const hapiIntacctOptions: IHapiIntacctOptions = {
 export const hapiIntacctPlugin: PluginRegistrationObject<any> = {
     options: hapiIntacctOptions,
     register: hapiIntacct.register,
-    select: ["paypal-intacct-private"],
+    select: ["private"],
 };
 
 export const hapiIntacctGlueRegistration = {

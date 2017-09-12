@@ -55,7 +55,7 @@ export const hapiPayPalOptions: IHapiPayPalOptions = {
 export const hapiPayPalPlugin: PluginRegistrationObject<any> = {
     options: hapiPayPalOptions,
     register: hapiPayPal.register,
-    select: ["paypal-intacct-public"],
+    select: ["public"],
 };
 
 export const hapiPayPalGlueRegistration = {
