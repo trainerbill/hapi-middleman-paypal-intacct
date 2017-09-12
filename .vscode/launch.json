@@ -1,0 +1,40 @@
+{
+    // Use IntelliSense to learn about possible Node.js debug attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Tests",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+            "runtimeArgs": [ 
+                "./node_modules/.bin/tape",
+                "test/**/*-spec.ts" ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Test File",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+            "runtimeArgs": [
+                "-r",
+                "dotenv/config",
+                "./node_modules/.bin/tape",
+                "${file}",
+                "dotenv_config_path=./example/.env"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Server Example",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
+            "runtimeArgs": [ 
+                "-r",
+                "dotenv/config",
+                "${workspaceRoot}/example/server.ts" ]
+        }
+    ]
+}
