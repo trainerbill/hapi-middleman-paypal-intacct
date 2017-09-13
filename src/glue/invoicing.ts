@@ -1,7 +1,5 @@
 import { PluginRegistrationObject } from "hapi";
 import { HapiPayPalIntacctInvoicing, IInvoicingOptions } from "../";
-import { hapiIntacctOptions } from "./hapi-intacct";
-import { hapiPayPalOptions } from "./hapi-paypal";
 
 export const hapiPayPalIntacctInvoicing = new HapiPayPalIntacctInvoicing();
 
