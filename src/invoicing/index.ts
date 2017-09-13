@@ -13,7 +13,6 @@ import {
     paypalPhoneSchema,
     PayPalRestApi,
 } from "paypal-rest-api";
-import { GlueRegistrations, hapiIntacctOptions, hapiPayPalOptions } from "../glue";
 import { HapiIntacctInvoicing } from "./intacct";
 
 export * from "./intacct";
