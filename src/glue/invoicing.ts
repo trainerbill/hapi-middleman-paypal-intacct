@@ -3,7 +3,7 @@ import { HapiPayPalIntacctInvoicing, IInvoicingOptions } from "../";
 
 export const hapiPayPalIntacctInvoicing = new HapiPayPalIntacctInvoicing();
 
-export const hapiInvoicingOptions: IInvoicingOptions = {
+export const hapiPayPalIntacctInvoicingOptions: IInvoicingOptions = {
     autogenerate: process.env.INVOICING_AUTO ? true : false,
     cron: {
         create: {
@@ -39,12 +39,12 @@ export const hapiInvoicingOptions: IInvoicingOptions = {
     reminderDays: process.env.INVOICE_REMINDER_DAYS ? process.env.INVOICE_REMINDER_DAYS * 1 : undefined,
 };
 
-export const hapiPayPalIntacctPlugin: PluginRegistrationObject<any> = {
-    options: hapiInvoicingOptions,
+export const hapiPayPalIntacctInvoicingPlugin: PluginRegistrationObject<any> = {
+    options: hapiPayPalIntacctInvoicingOptions,
     register: hapiPayPalIntacctInvoicing.register,
     select: ["private"],
 };
 
-export const hapiPayPalIntacctGlueRegistration = {
-    plugin: hapiPayPalIntacctPlugin,
+export const hapiPayPalIntacctInvoicingGlueRegistration = {
+    plugin: hapiPayPalIntacctInvoicingPlugin,
 };

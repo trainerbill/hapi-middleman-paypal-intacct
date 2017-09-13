@@ -1,19 +1,17 @@
+import { PluginRegistrationObject } from "hapi";
 import { hapiIntacctGlueRegistration } from "./hapi-intacct";
 import { hapiPayPalGlueRegistration } from "./hapi-paypal";
-import { hapiPayPalIntacctGlueRegistration } from "./invoicing";
+import { hapiPayPalIntacctInvoicingGlueRegistration } from "./invoicing";
 
-export const glueRegistrations: any = [
-    hapiPayPalGlueRegistration,
-    hapiIntacctGlueRegistration,
-    hapiPayPalIntacctGlueRegistration,
-];
+export { PluginRegistrationObject } from "hapi";
+export { hapiIntacctGlueRegistration } from "./hapi-intacct";
+export { hapiPayPalGlueRegistration } from "./hapi-paypal";
+export { hapiPayPalIntacctInvoicingGlueRegistration } from "./invoicing";
 
-export const glueManifest = {
+export default {
     registrations: [
-        ...glueRegistrations,
+        hapiIntacctGlueRegistration,
+        hapiPayPalGlueRegistration,
+        hapiPayPalIntacctInvoicingGlueRegistration,
     ],
 };
-
-export * from "./hapi-intacct";
-export * from "./hapi-paypal";
-export * from "./invoicing";
