@@ -1,12 +1,10 @@
 import * as hapi from "hapi";
 import { intacctPaymentSchema } from "hapi-intacct/lib/joi";
 import * as joi from "joi";
-import * as later from "later";
 
 export class HapiIntacctInvoicing {
 
     private server: hapi.Server;
-    private requiredRoutes: string[];
 
     // constructor() {}
 

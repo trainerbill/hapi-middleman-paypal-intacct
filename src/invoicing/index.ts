@@ -1,9 +1,7 @@
 import * as hapi from "hapi";
-import { IIntacctRouteConfiguration } from "hapi-intacct";
 import * as joi from "joi";
 import * as later from "later";
 import {
-    IInvoice,
     IInvoiceItem,
     invoiceBillingInfoSchema,
     InvoiceModel,
@@ -67,7 +65,6 @@ export class HapiPayPalIntacctInvoicing {
 
     public intacct: HapiIntacctInvoicing;
     public paypal: PayPalRestApi;
-    private intacctInvoiceKeys: string[];
     private server: hapi.Server;
     private options: IInvoicingOptions;
 
@@ -83,7 +80,6 @@ export class HapiPayPalIntacctInvoicing {
         this.server = server;
         this.intacct.setServer(this.server);
         this.paypal = server.plugins["hapi-paypal"].paypal;
-        const promises = [];
 
         // Validate Options
         const optionsSchema = joi.object().keys({
@@ -155,7 +151,7 @@ export class HapiPayPalIntacctInvoicing {
 
                         // For some reason the object has to be exacly in this order...
                         // tslint:disable:object-literal-sort-keys
-                        const create = await this.intacct.createPayment({
+                        await this.intacct.createPayment({
                             customerid: webhook.resource.invoice.billing_info[0].additional_info,
                             paymentamount: webhook.resource.invoice.total_amount.value,
                             bankaccountid: account,
@@ -328,9 +324,9 @@ export class HapiPayPalIntacctInvoicing {
         try {
             // tslint:disable-next-line:max-line-length
             const invoices = await Promise.all([this.intacct.query(query, ["RECORDNO"]), this.paypal.invoice.search({ status: ["SENT", "UNPAID"] })]);
-            invoices[0].forEach(async (invoice: any) => await this.syncIntacctToPayPal(invoice));
-            invoices[1].forEach(async (invoice) => await this.syncPayPalToIntacct(invoice));
-            // await Promise.all(promises);
+            invoices[0].forEach((invoice: any) => promises.push(this.syncIntacctToPayPal(invoice)));
+            invoices[1].forEach((invoice) => promises.push(this.syncPayPalToIntacct(invoice)));
+            await Promise.all(promises);
             this.server.log("info", "hapi-paypal-intacct::syncInvoices::Success");
         } catch (err) {
             this.server.log("error", `hapi-paypal-intacct::syncInvoices::Error::${err.message}`);

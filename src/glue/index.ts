@@ -2,15 +2,15 @@ import { hapiIntacctGlueRegistration } from "./hapi-intacct";
 import { hapiPayPalGlueRegistration } from "./hapi-paypal";
 import { hapiPayPalIntacctGlueRegistration } from "./invoicing";
 
-export const GlueRegistrations: any = [
+export const glueRegistrations: any = [
     hapiPayPalGlueRegistration,
     hapiIntacctGlueRegistration,
     hapiPayPalIntacctGlueRegistration,
 ];
 
-export const GlueManifest = {
+export const glueManifest = {
     registrations: [
-        ...GlueRegistrations,
+        ...glueRegistrations,
     ],
 };
 
