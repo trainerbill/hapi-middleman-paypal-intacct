@@ -292,7 +292,7 @@ export class HapiPayPalIntacctInvoicing {
             }
             try {
                 const promises: Array<Promise<any>> = [];
-                paypalInvoice.model.payments.forEach(async (payment) => {
+                paypalInvoice.model.payments.forEach(async (payment: any) => {
                   const sale = await this.paypal.sale.get(payment.transaction_id);
                   promises.push(sale.refund());
                 });
