@@ -235,13 +235,16 @@ export class HapiPayPalIntacctInvoicing {
         try {
             const accounts = await this.intacct.listAccounts();
             configAccounts.forEach((account) => {
-            const filteredAccounts = accounts.filter((faccount: any) => {
-                return faccount.BANKACCOUNTID === account;
+                if (!account) {
+                    return;
+                }
+                const filteredAccounts = accounts.filter((faccount: any) => {
+                    return faccount.BANKACCOUNTID === account;
+                });
+                if (filteredAccounts.length < 1) {
+                    throw new Error(`Intacct Payment Account ${account} configured but does not exist in Intacct`);
+                }
             });
-            if (filteredAccounts.length < 1) {
-                throw new Error(`Intacct Payment Account ${account} configured but does not exist in Intacct`);
-            }
-        });
         } catch (err) {
             this.server.log("error", `hapi-paypal-intacct::validateAccounts::${err.message}`);
             throw err;
