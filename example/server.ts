@@ -51,5 +51,9 @@ if (!module.parent) {
             port: process.env.PUBLIC_PORT || process.env.PORT || 3000,
         },
     ];
-    glue.compose(GlueManifest).then((server: hapi.Server) => server.start());
+    glue.compose(GlueManifest).then(async (server: hapi.Server) => {
+        await server.start();
+        // tslint:disable-next-line:no-console
+        console.log("Started!");
+    });
 }

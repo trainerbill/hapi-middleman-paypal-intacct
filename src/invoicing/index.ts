@@ -18,10 +18,6 @@ import { HapiIntacctInvoicing } from "./intacct";
 
 export * from "./intacct";
 
-export declare type Partial<T> = {
-    [P in keyof T]?: T[P];
-};
-
 export interface IInvoicingMerchant {
     address: {
         city: string;
@@ -78,7 +74,6 @@ export class HapiPayPalIntacctInvoicing {
 
     constructor() {
         this.register.attributes = {
-            dependencies: ["hapi-paypal", "hapi-intacct"],
             name: "hapi-paypal-intacct-invoicing",
         };
         this.intacct = new HapiIntacctInvoicing();
@@ -334,9 +329,9 @@ export class HapiPayPalIntacctInvoicing {
         try {
             // tslint:disable-next-line:max-line-length
             const invoices = await Promise.all([this.intacct.query(query, ["RECORDNO"]), this.paypal.invoice.search({ status: ["SENT", "UNPAID"] })]);
-            invoices[0].forEach((invoice: any) => promises.push(this.syncIntacctToPayPal(invoice)));
-            invoices[1].forEach((invoice) => promises.push(this.syncPayPalToIntacct(invoice)));
-            await Promise.all(promises);
+            invoices[0].forEach(async (invoice: any) => await this.syncIntacctToPayPal(invoice));
+            invoices[1].forEach(async (invoice) => await this.syncPayPalToIntacct(invoice));
+            // await Promise.all(promises);
             this.server.log("info", "hapi-paypal-intacct::syncInvoices::Success");
         } catch (err) {
             this.server.log("error", `hapi-paypal-intacct::syncInvoices::Error::${err.message}`);
