@@ -1,6 +1,7 @@
 import * as hapi from "hapi";
 import * as joi from "joi";
 import * as later from "later";
+
 import {
     IInvoiceItem,
     invoiceBillingInfoSchema,
@@ -413,10 +414,21 @@ export class HapiPayPalIntacctInvoicing {
         const paypalInvoice: any = {
             billing_info: [{
                 additional_info: intacctInvoice.CUSTOMERID,
+                address: {
+                    city: intacctInvoice.BILLTO.MAILADDRESS.CITY,
+                    country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE,
+                    line1: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS1,
+                    line2: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS2,
+                    postal_code: intacctInvoice.BILLTO.MAILADDRESS.ZIP,
+                    state: intacctInvoice.BILLTO.MAILADDRESS.STATE,
+                },
                 business_name: intacctInvoice.BILLTO.COMPANYNAME,
                 email: intacctInvoice.BILLTO.EMAIL1,
                 first_name: intacctInvoice.BILLTO.FIRSTNAME,
                 last_name: intacctInvoice.BILLTO.LASTNAME,
+                phone: {
+                    national_number: intacctInvoice.BILLTO.PHONE1,
+                },
             }],
             items: this.toPayPalLineItems(intacctInvoice.ARINVOICEITEMS.arinvoiceitem),
             merchant_info: this.options.merchant,
@@ -426,53 +438,20 @@ export class HapiPayPalIntacctInvoicing {
                 term_type: intacctInvoice.TERMNAME,
             },
             shipping_info: {
+                address: {
+                    city: intacctInvoice.SHIPTO.MAILADDRESS.CITY,
+                    country_code: intacctInvoice.SHIPTO.MAILADDRESS.COUNTRYCODE,
+                    line1: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS1,
+                    line2: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS2,
+                    postal_code: intacctInvoice.SHIPTO.MAILADDRESS.ZIP,
+                    state: intacctInvoice.SHIPTO.MAILADDRESS.STATE,
+                },
                 business_name: intacctInvoice.SHIPTO.CONTACTNAME,
                 first_name: intacctInvoice.SHIPTO.FIRSTNAME,
                 last_name: intacctInvoice.SHIPTO.LASTNAME,
             },
             tax_inclusive: true,
         };
-
-        const shippingAddress = {
-            city: intacctInvoice.SHIPTO.MAILADDRESS.CITY,
-            country_code: intacctInvoice.SHIPTO.MAILADDRESS.COUNTRYCODE,
-            line1: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS1,
-            line2: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS2,
-            postal_code: intacctInvoice.SHIPTO.MAILADDRESS.ZIP,
-            state: intacctInvoice.SHIPTO.MAILADDRESS.STATE,
-        };
-        joi.validate(shippingAddress, paypalAddressSchema, (err, value) => {
-            if (err) {
-                return;
-            }
-            paypalInvoice.shipping_info.address = value;
-        });
-
-        const billingAddress = {
-            city: intacctInvoice.BILLTO.MAILADDRESS.CITY,
-            country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE,
-            line1: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS1,
-            line2: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS2,
-            postal_code: intacctInvoice.BILLTO.MAILADDRESS.ZIP,
-            state: intacctInvoice.BILLTO.MAILADDRESS.STATE,
-        };
-        joi.validate(billingAddress, paypalAddressSchema, (err, value) => {
-            if (err) {
-                return;
-            }
-            paypalInvoice.billing_info[0].address = value;
-        });
-
-        const billingPhone = {
-            country_code: "1",
-            national_number: intacctInvoice.BILLTO.PHONE1,
-        };
-        joi.validate(billingPhone, paypalPhoneSchema, (err, value) => {
-            if (err) {
-                return;
-            }
-            paypalInvoice.billing_info[0].phone = value;
-        });
 
         const validateResult = joi.validate(paypalInvoice, invoiceSchema);
         if (validateResult.error) {
