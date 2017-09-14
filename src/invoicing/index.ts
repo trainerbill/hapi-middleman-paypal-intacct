@@ -197,7 +197,7 @@ export class HapiPayPalIntacctInvoicing {
         const promises: Array<Promise<any>> = [];
         try {
             this.server.log("info", `hapi-paypal-intacct::initInvoicing::${JSON.stringify(this.options)}.`);
-            await Promise.all([ this.validateKeys(), this.validateAccounts()]);
+            await Promise.all([this.validateKeys(), this.validateAccounts()]);
             if (this.options.cron.create && this.options.cron.create.latertext) {
                 promises.push(this.createInvoiceSync());
                 const timer = later.parse.text(this.options.cron.create.latertext);
@@ -293,8 +293,8 @@ export class HapiPayPalIntacctInvoicing {
             try {
                 const promises: Array<Promise<any>> = [];
                 paypalInvoice.model.payments.forEach(async (payment: any) => {
-                  const sale = await this.paypal.sale.get(payment.transaction_id);
-                  promises.push(sale.refund());
+                    const sale = await this.paypal.sale.get(payment.transaction_id);
+                    promises.push(sale.refund());
                 });
                 await Promise.all(promises);
                 await this.intacct.update(invoice.RECORDNO, {
@@ -503,8 +503,10 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     private updateInacctInvoiceWithPayPalModel(intacctInvoice: any, paypalInvoice: InvoiceModel) {
-      intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
-      intacctInvoice.PAYPALINVOICESTATUS = paypalInvoice.model.status;
-      intacctInvoice.PAYPALINVOICEURL = paypalInvoice.model.metadata.payer_view_url;
+        intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
+        intacctInvoice.PAYPALINVOICESTATUS = paypalInvoice.model.status;
+        if (paypalInvoice.model.metadata) {
+            intacctInvoice.PAYPALINVOICEURL = paypalInvoice.model.metadata.payer_view_url;
+        }
     }
 }
