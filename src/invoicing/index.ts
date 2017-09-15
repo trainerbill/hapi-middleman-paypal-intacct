@@ -3,10 +3,10 @@ import * as joi from "joi";
 import * as later from "later";
 
 import {
+    IInvoice,
     IInvoiceItem,
     invoiceBillingInfoSchema,
     InvoiceModel,
-    invoiceSchema,
     IWebhookEvent,
     paypalAddressSchema,
     paypalPhoneSchema,
@@ -361,7 +361,6 @@ export class HapiPayPalIntacctInvoicing {
             }
 
             if (intacctInvoice.PAYPALINVOICEID && paypalInvoice) {
-                // Update a PayPal Invoice
                 await paypalInvoice.update(this.toPaypalInvoice(intacctInvoice));
             } else if (!intacctInvoice.PAYPALINVOICEID) {
                 // Create a PayPal Invoice
@@ -410,8 +409,7 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     private toPaypalInvoice(intacctInvoice: any) {
-        // TODO: change to ppInvoice.Invoice when billing_info is fixed
-        const paypalInvoice: any = {
+        const paypalInvoice: Partial<IInvoice> = {
             billing_info: [{
                 additional_info: intacctInvoice.CUSTOMERID,
                 address: {
@@ -419,6 +417,10 @@ export class HapiPayPalIntacctInvoicing {
                     country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE,
                     line1: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS1,
                     line2: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS2,
+                    phone: {
+                        country_code: "1",
+                        national_number: intacctInvoice.BILLTO.PHONE1,
+                    },
                     postal_code: intacctInvoice.BILLTO.MAILADDRESS.ZIP,
                     state: intacctInvoice.BILLTO.MAILADDRESS.STATE,
                 },
@@ -427,6 +429,7 @@ export class HapiPayPalIntacctInvoicing {
                 first_name: intacctInvoice.BILLTO.FIRSTNAME,
                 last_name: intacctInvoice.BILLTO.LASTNAME,
                 phone: {
+                    country_code: "1",
                     national_number: intacctInvoice.BILLTO.PHONE1,
                 },
             }],
@@ -435,6 +438,7 @@ export class HapiPayPalIntacctInvoicing {
             note: intacctInvoice.CUSTMESSAGE.MESSAGE,
             number: intacctInvoice.RECORDNO,
             payment_term: {
+                due_date: intacctInvoice.WHENDUE + " PDT",
                 term_type: intacctInvoice.TERMNAME,
             },
             shipping_info: {
@@ -452,13 +456,12 @@ export class HapiPayPalIntacctInvoicing {
             },
             tax_inclusive: true,
         };
+        /*
+        if (!paypalInvoice.payment_term && !paypalInvoice.payment_term.due_date) {
 
-        const validateResult = joi.validate(paypalInvoice, invoiceSchema);
-        if (validateResult.error) {
-            throw new Error(validateResult.error.message);
         }
-
-        return validateResult.value;
+        */
+        return paypalInvoice;
     }
 
     private toPayPalLineItems(arrInvoiceItems: any) {
