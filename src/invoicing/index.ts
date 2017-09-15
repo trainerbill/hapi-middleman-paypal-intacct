@@ -64,10 +64,10 @@ export const intacctInvoiceExtend = {
 
 export class HapiPayPalIntacctInvoicing {
 
-    public intacct: HapiIntacctInvoicing;
-    public paypal: PayPalRestApi;
-    private server: hapi.Server;
-    private options: IInvoicingOptions;
+    private _intacct: HapiIntacctInvoicing;
+    private _paypal: PayPalRestApi;
+    private _server: hapi.Server;
+    private _options: IInvoicingOptions;
 
     constructor() {
         this.register.attributes = {
@@ -76,13 +76,35 @@ export class HapiPayPalIntacctInvoicing {
         this.intacct = new HapiIntacctInvoicing();
     }
 
-    // tslint:disable-next-line:max-line-length
-    public register: hapi.PluginFunction<any> = (server: hapi.Server, options: any, next: hapi.ContinuationFunction) => {
-        this.server = server;
-        this.intacct.setServer(this.server);
-        this.paypal = server.plugins["hapi-paypal"].paypal;
+    get intacct() {
+        return this._intacct;
+    }
 
-        // Validate Options
+    set intacct(intacct) {
+        this._intacct = intacct;
+    }
+
+    get paypal() {
+        return this._paypal;
+    }
+
+    set paypal(paypal) {
+        this._paypal = paypal;
+    }
+
+    get server() {
+        return this._server;
+    }
+
+    set server(server) {
+        this._server = server;
+    }
+
+    get options() {
+        return this._options;
+    }
+
+    set options(options) {
         const optionsSchema = joi.object().keys({
             autogenerate: joi.boolean().required(),
             cron: joi.object().keys({
@@ -104,9 +126,20 @@ export class HapiPayPalIntacctInvoicing {
         if (validate.error) {
             throw validate.error;
         }
-        this.options = validate.value;
+        this._options = validate.value;
+    }
 
-        return this.init().then(() => next());
+    // tslint:disable-next-line:max-line-length
+    public register: hapi.PluginFunction<any> = (server: hapi.Server, options: any, next: hapi.ContinuationFunction) => {
+        this.server = server;
+        this.intacct.setServer(this.server);
+        this.paypal = server.plugins["hapi-paypal"].paypal;
+
+        return this.init()
+                .then(() => next())
+                .catch((err) => {
+                    throw err;
+                });
     }
 
     public async webhookHandler(webhook: IWebhookEvent) {
@@ -194,34 +227,7 @@ export class HapiPayPalIntacctInvoicing {
         }
     }
 
-    private async init() {
-        const promises: Array<Promise<any>> = [];
-        try {
-            this.server.log("info", `hapi-paypal-intacct::initInvoicing::${JSON.stringify(this.options)}.`);
-            await Promise.all([this.validateKeys(), this.validateAccounts()]);
-            if (this.options.cron.create && this.options.cron.create.latertext) {
-                promises.push(this.createInvoiceSync());
-                const timer = later.parse.text(this.options.cron.create.latertext);
-                later.setInterval(this.createInvoiceSync.bind(this), timer);
-                // tslint:disable-next-line:max-line-length
-                this.server.log("info", `hapi-paypal-intacct::initInvoicing::create cron set for ${this.options.cron.create.latertext}.`);
-            }
-
-            if (this.options.cron.refund && this.options.cron.refund.latertext) {
-                promises.push(this.refundInvoicesSync());
-                const refundtimer = later.parse.text(this.options.cron.refund.latertext);
-                later.setInterval(this.refundInvoicesSync.bind(this), refundtimer);
-                // tslint:disable-next-line:max-line-length
-                this.server.log("info", `hapi-paypal-intacct::initInvoicing::refund cron set for ${this.options.cron.refund.latertext}.`);
-            }
-            return await Promise.all(promises);
-        } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::init::${err.message}`);
-            throw err;
-        }
-    }
-
-    private async validateAccounts() {
+    public async validateAccounts() {
         const configAccounts: string[] = [];
         if (!this.options.paymentaccounts) {
             return;
@@ -247,12 +253,11 @@ export class HapiPayPalIntacctInvoicing {
                 }
             });
         } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::validateAccounts::${err.message}`);
             throw err;
         }
     }
 
-    private async validateKeys() {
+    public async validateKeys() {
         try {
             const inspect = await this.intacct.inspect();
             Object.keys(intacctInvoiceExtend).forEach((key) => {
@@ -261,12 +266,11 @@ export class HapiPayPalIntacctInvoicing {
                 }
             });
         } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::validateKeys::${err.message}`);
             throw err;
         }
     }
 
-    private async refundInvoicesSync() {
+    public async refundInvoicesSync() {
         try {
             const promises: Array<Promise<any>> = [];
             const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS = 'PAID'`;
@@ -283,7 +287,7 @@ export class HapiPayPalIntacctInvoicing {
         }
     }
 
-    private async refundInvoiceSync(invoice: any) {
+    public async refundInvoiceSync(invoice: any) {
         try {
             let paypalInvoice;
             try {
@@ -318,7 +322,7 @@ export class HapiPayPalIntacctInvoicing {
         }
     }
 
-    private async createInvoiceSync() {
+    public async createInvoiceSync() {
         // tslint:disable-next-line:max-line-length
         let query = process.env.INTACCT_INVOICE_QUERY || `RAWSTATE = 'A' AND ( PAYPALINVOICESTATUS IN (NULL,'DRAFT') OR PAYPALINVOICEID IS NULL ) AND WHENCREATED > '8/1/2017'`;
         if (!this.options.autogenerate && !process.env.INTACCT_INVOICE_QUERY) {
@@ -328,8 +332,13 @@ export class HapiPayPalIntacctInvoicing {
         try {
             // tslint:disable-next-line:max-line-length
             const invoices = await Promise.all([this.intacct.query(query, ["RECORDNO"]), this.paypal.invoice.search({ status: ["SENT", "UNPAID"] })]);
-            invoices[0].forEach((invoice: any) => promises.push(this.syncIntacctToPayPal(invoice)));
-            invoices[1].forEach((invoice) => promises.push(this.syncPayPalToIntacct(invoice)));
+            for (const invoice of invoices[0]) {
+                promises.push(this.syncIntacctToPayPal(invoice));
+            }
+            await Promise.all(promises);
+            for (const invoice of invoices[1]) {
+                promises.push(this.syncPayPalToIntacct(invoice));
+            }
             await Promise.all(promises);
             this.server.log("info", "hapi-paypal-intacct::syncInvoices::Success");
         } catch (err) {
@@ -337,7 +346,7 @@ export class HapiPayPalIntacctInvoicing {
         }
     }
 
-    private async syncIntacctToPayPal(invoice: any) {
+    public async syncIntacctToPayPal(invoice: any) {
         let paypalInvoice;
         let intacctInvoice: any;
         const intacctUpdate: any = {
@@ -353,7 +362,7 @@ export class HapiPayPalIntacctInvoicing {
                 paypalInvoice = fullInvoices[1][0];
                 intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
             } else if (fullInvoices[1].length > 1) {
-                const ids = fullInvoices[1].map((inv) => inv.model.id);
+                const ids = fullInvoices[1].map((inv: any) => inv.model.id);
                 // tslint:disable-next-line:max-line-length
                 const error = `Multiple PayPal Invoice IDs ${ids}.  You should login to paypal and cancel one.\n`;
                 intacctInvoice.PAYPALERROR += error;
@@ -391,7 +400,7 @@ export class HapiPayPalIntacctInvoicing {
         }
     }
 
-    private async syncPayPalToIntacct(invoice: InvoiceModel) {
+    public async syncPayPalToIntacct(invoice: InvoiceModel) {
         try {
             const intacctInvoice = await this.intacct.get(invoice.model.number);
             if (!intacctInvoice) {
@@ -408,7 +417,7 @@ export class HapiPayPalIntacctInvoicing {
         }
     }
 
-    private toPaypalInvoice(intacctInvoice: any) {
+    public toPaypalInvoice(intacctInvoice: any) {
         const paypalInvoice: Partial<IInvoice> = {
             billing_info: [{
                 additional_info: intacctInvoice.CUSTOMERID,
@@ -417,10 +426,6 @@ export class HapiPayPalIntacctInvoicing {
                     country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE,
                     line1: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS1,
                     line2: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS2,
-                    phone: {
-                        country_code: "1",
-                        national_number: intacctInvoice.BILLTO.PHONE1,
-                    },
                     postal_code: intacctInvoice.BILLTO.MAILADDRESS.ZIP,
                     state: intacctInvoice.BILLTO.MAILADDRESS.STATE,
                 },
@@ -464,7 +469,7 @@ export class HapiPayPalIntacctInvoicing {
         return paypalInvoice;
     }
 
-    private toPayPalLineItems(arrInvoiceItems: any) {
+    public toPayPalLineItems(arrInvoiceItems: any) {
 
         const arrPPInvItems: IInvoiceItem[] = [];
 
@@ -484,6 +489,33 @@ export class HapiPayPalIntacctInvoicing {
         return arrPPInvItems;
     }
 
+    public async init() {
+        const promises: Array<Promise<any>> = [];
+        try {
+            this.server.log("info", `hapi-paypal-intacct::initInvoicing::${JSON.stringify(this.options)}.`);
+            await Promise.all([this.validateKeys(), this.validateAccounts()]);
+            if (this.options.cron.create && this.options.cron.create.latertext) {
+                promises.push(this.createInvoiceSync());
+                const timer = later.parse.text(this.options.cron.create.latertext);
+                later.setInterval(this.createInvoiceSync.bind(this), timer);
+                // tslint:disable-next-line:max-line-length
+                this.server.log("info", `hapi-paypal-intacct::initInvoicing::create cron set for ${this.options.cron.create.latertext}.`);
+            }
+
+            if (this.options.cron.refund && this.options.cron.refund.latertext) {
+                promises.push(this.refundInvoicesSync());
+                const refundtimer = later.parse.text(this.options.cron.refund.latertext);
+                later.setInterval(this.refundInvoicesSync.bind(this), refundtimer);
+                // tslint:disable-next-line:max-line-length
+                this.server.log("info", `hapi-paypal-intacct::initInvoicing::refund cron set for ${this.options.cron.refund.latertext}.`);
+            }
+            return await Promise.all(promises);
+        } catch (err) {
+            this.server.log("error", `hapi-paypal-intacct::init::${err.message}`);
+            throw err;
+        }
+    }
+
     private updateInacctInvoiceWithPayPalModel(intacctInvoice: any, paypalInvoice: InvoiceModel) {
         intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
         intacctInvoice.PAYPALINVOICESTATUS = paypalInvoice.model.status;
@@ -491,4 +523,5 @@ export class HapiPayPalIntacctInvoicing {
             intacctInvoice.PAYPALINVOICEURL = paypalInvoice.model.metadata.payer_view_url;
         }
     }
+
 }

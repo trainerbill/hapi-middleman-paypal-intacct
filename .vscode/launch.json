@@ -4,15 +4,18 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+
         {
             "type": "node",
             "request": "launch",
             "name": "Launch Tests",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
-            "runtimeArgs": [ 
+            "runtimeArgs": [
+                "-r",
+                "dotenv/config",
                 "./node_modules/.bin/tape",
-                "test/**/*-spec.ts" ]
+                "test/**/*-spec.ts",
+                "dotenv_config_path=./test/.env"]
         },
         {
             "type": "node",
@@ -24,14 +27,14 @@
                 "dotenv/config",
                 "./node_modules/.bin/tape",
                 "${file}",
-                "dotenv_config_path=./example/.env"]
+                "dotenv_config_path=./test/.env"]
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Launch Server Example",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-node",
-            "runtimeArgs": [ 
+            "runtimeArgs": [
                 "-r",
                 "dotenv/config",
                 "${workspaceRoot}/example/server.ts" ]
