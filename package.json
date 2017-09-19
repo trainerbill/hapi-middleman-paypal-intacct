@@ -22,7 +22,7 @@
     "clean": "rimraf lib coverage",
     "lint": "tslint --project tsconfig.json --force --format verbose \"src/**/*.ts\"",
     "build": "yarn run clean && yarn run lint && echo Using TypeScript && tsc --version && tsc --pretty",
-    "test": "nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec; nyc report ---reporter=text",
+    "test": "yarn run lint && nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec; nyc report ---reporter=text",
     "watch": "yarn run build -- --watch",
     "watch:test": "yarn run test -- --watch",
     "release": "yarn publish --new-version",
