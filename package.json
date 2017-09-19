@@ -1,6 +1,6 @@
 {
   "name": "hapi-middleman-paypal-intacct",
-  "version": "0.0.37",
+  "version": "0.0.36",
   "description": "hapi-middleman module for integrating paypal with intacct",
   "license": "MIT",
   "repository": "",
@@ -29,7 +29,8 @@
     "release:quick": "git add -A && git commit -m 'Quick Release Patch' && yarn run release patch",
     "reinstall": "rimraf node_modules yarn.lock && yarn install",
     "start": "ts-node -r dotenv/config ./example/server.ts",
-    "prepublish": "yarn test && yarn run build"
+    "prepublish": "yarn test && yarn run build",
+    "postpublish": "git push && git push --tags"
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
