@@ -1,5 +1,5 @@
 import * as hapi from "hapi";
-import { intacctPaymentSchema } from "hapi-intacct/lib/joi";
+import { intacctPaymentSchema } from "hapi-intacct";
 import * as joi from "joi";
 
 export class HapiIntacctInvoicing {

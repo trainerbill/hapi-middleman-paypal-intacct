@@ -1,15 +1,12 @@
 import * as hapi from "hapi";
 import * as joi from "joi";
 import * as later from "later";
-
 import {
     IInvoice,
     IInvoiceItem,
     invoiceBillingInfoSchema,
     InvoiceModel,
     IWebhookEvent,
-    paypalAddressSchema,
-    paypalPhoneSchema,
     PayPalRestApi,
 } from "paypal-rest-api";
 import { HapiIntacctInvoicing } from "./intacct";
