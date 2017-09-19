@@ -36,7 +36,7 @@ export const hapiPayPalIntacctInvoicingOptions: IInvoicingOptions = {
         },
         default: process.env.INVOICE_PAYMENT_DEFAULT_ACCOUNT,
     },
-    reminderDays: process.env.INVOICE_REMINDER_DAYS ? process.env.INVOICE_REMINDER_DAYS * 1 : undefined,
+    reminderDays: process.env.INVOICE_REMINDER_DAYS ? parseInt(process.env.INVOICE_REMINDER_DAYS, 10) : undefined,
 };
 
 export const hapiPayPalIntacctInvoicingPlugin: PluginRegistrationObject<any> = {
