@@ -30,7 +30,7 @@
     "reinstall": "rimraf node_modules yarn.lock && yarn install",
     "start": "ts-node -r dotenv/config ./example/server.ts",
     "prepublish": "yarn test && yarn run build",
-    "postpublish": "git push --tags"
+    "publish": "git push --tags"
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
