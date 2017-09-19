@@ -1,6 +1,6 @@
 {
   "name": "hapi-middleman-paypal-intacct",
-  "version": "0.0.49",
+  "version": "0.0.50",
   "description": "hapi-middleman module for integrating paypal with intacct",
   "license": "MIT",
   "repository": "",
