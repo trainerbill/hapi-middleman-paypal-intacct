@@ -2,6 +2,8 @@ language: node_js
 node_js:
   - 'node' # use latest stable nodejs version
   - '6'
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.0.2
 script:
   - yarn build
   - yarn test
