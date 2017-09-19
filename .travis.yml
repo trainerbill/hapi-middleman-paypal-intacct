@@ -1,9 +1,13 @@
 language: node_js
 node_js:
+  - 'node' # use latest stable nodejs version
   - '6'
   - '4'
+before_script:
+  - npm install -g yarn
 script:
-  - npm run build  # build
-  - npm run coverage  # run mocha unit tests with coverage
+  - yarn build
+  - yarn test
+  - yarn run coverage
 after_script:
   - 'cat coverage/lcov.info | ./node_modules/.bin/coveralls' # sends the coverage report to coveralls
