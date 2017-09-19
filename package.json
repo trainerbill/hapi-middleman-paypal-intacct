@@ -25,13 +25,11 @@
     "test": "yarn run lint && nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec; nyc report ---reporter=text",
     "watch": "yarn run build -- --watch",
     "watch:test": "yarn run test -- --watch",
-    "release": "yarn run build && yarn version --new-version",
+    "release": "yarn test && yarn run build && yarn publish --new-version",
     "release:quick": "git add -A && git commit -m 'Quick Release Patch' && yarn run release patch",
     "reinstall": "rimraf node_modules yarn.lock && yarn install",
     "start": "ts-node -r dotenv/config ./example/server.ts",
-    "preversion": "yarn test",
-    "postversion": "yarn publish --non-interactive",
-    "publish": "git push --tags"
+    "publish": "git push --follow-tags"
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
