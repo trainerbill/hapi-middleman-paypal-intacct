@@ -19,10 +19,11 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
+    "coverage": "nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec && nyc report ---reporter=text",
     "clean": "rimraf lib coverage",
     "lint": "tslint --project tsconfig.json --force --format verbose \"src/**/*.ts\"",
     "build": "yarn run clean && yarn run lint && echo Using TypeScript && tsc --version && tsc --pretty",
-    "test": "yarn run lint && nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec; nyc report ---reporter=text",
+    "test": "yarn run lint && yarn run coverage",
     "watch": "yarn run build -- --watch",
     "watch:test": "yarn run test -- --watch",
     "release": "yarn test && yarn run build && yarn publish --new-version",
