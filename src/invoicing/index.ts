@@ -54,6 +54,7 @@ export interface IInvoicingOptions {
     reminderDays?: number;
 }
 
+// TODO: Remove in favor of class static
 export const intacctInvoiceExtend = {
     PAYPALERROR: "",
     PAYPALINVOICEID: "",
@@ -63,6 +64,14 @@ export const intacctInvoiceExtend = {
 };
 
 export class HapiPayPalIntacctInvoicing {
+
+    public static intacctKeys = [
+        "PAYPALERROR",
+        "PAYPALINVOICEID",
+        "PAYPALINVOICESTATUS",
+        "PAYPALINVOICEURL",
+        "PAYPALINVOICING",
+    ];
 
     private _intacct: HapiIntacctInvoicing;
     private _paypal: PayPalRestApi;
@@ -143,88 +152,63 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async webhookHandler(webhook: IWebhookEvent) {
+        const intacctInvoice: any = {
+            PAYPALERROR: "",
+        };
         switch (webhook.event_type) {
             case "INVOICING.INVOICE.REFUNDED":
-                try {
-                    this.intacct.update(webhook.resource.invoice.number, {
-                        PAYPALINVOICESTATUS: webhook.resource.invoice.status,
-                    });
-                } catch (err) {
-                    // tslint:disable-next-line:max-line-length
-                    this.server.log("error", `hapi-paypal-intacct::webhookHandler::UpdateInvoice::INVOICING.INVOICE.PAID::${webhook.resource.invoice.id}::${err.message}`);
-                }
-
+                // TODO: This can only happen if the refund via PP portal.
+                // May need to implement a refund at intacct in the future.
                 break;
             case "INVOICING.INVOICE.CANCELLED":
-                try {
-                    this.intacct.update(webhook.resource.invoice.number, {
-                        PAYPALINVOICESTATUS: webhook.resource.invoice.status,
-                    });
-                } catch (err) {
-                    // tslint:disable-next-line:max-line-length
-                    this.server.log("error", `hapi-paypal-intacct::webhookHandler::UpdateInvoice::INVOICING.INVOICE.PAID::${webhook.resource.invoice.id}::${err.message}`);
-                }
-
+                // TODO: Cancel the invoice at intacct?
+                // May need to implement a refund at intacct in the future.
                 break;
             case "INVOICING.INVOICE.PAID":
                 // const invoice = await this.intacct.get(webhook.resource.invoice.number);
-                const invoice: any = {
-                    PAYPALERROR: "",
-                };
-                if (this.options.paymentaccounts) {
-                    // Create a payment
-                    try {
-                        const account = this.options.paymentaccounts.currencies ?
-                            this.options.paymentaccounts.currencies[webhook.resource.invoice.total_amount.currency] :
-                            this.options.paymentaccounts.default;
 
-                        if (!account) {
-                            // tslint:disable-next-line:max-line-length
-                            throw new Error(`${webhook.resource.invoice.total_amount.currency} currency payment account not configured`);
-                        }
+                const account = this.options.paymentaccounts.currencies ?
+                        this.options.paymentaccounts.currencies[webhook.resource.invoice.total_amount.currency] :
+                        this.options.paymentaccounts.default;
 
-                        // For some reason the object has to be exacly in this order...
-                        // tslint:disable:object-literal-sort-keys
-                        await this.intacct.createPayment({
-                            customerid: webhook.resource.invoice.billing_info[0].additional_info,
-                            paymentamount: webhook.resource.invoice.total_amount.value,
-                            bankaccountid: account,
-                            // tslint:disable-next-line:max-line-length
-                            refid: webhook.resource.invoice.payments[webhook.resource.invoice.payments.length - 1].transaction_id,
-                            arpaymentitem: [{
-                                invoicekey: webhook.resource.invoice.number,
-                                amount: webhook.resource.invoice.total_amount.value,
-                            }],
-                        });
-                        // tslint:enable:object-literal-sort-keys
-                    } catch (err) {
-                        // tslint:disable-next-line:max-line-length
-                        this.server.log("error", `hapi-paypal-intacct::webhookHandler::CreatePaymnet::INVOICING.INVOICE.PAID::${webhook.resource.invoice.id}::${err.message}`);
-                        const error = JSON.parse(err.message);
-                        if (error.length === 1 && error[0].errorno !== "BL03000130") {
-                            invoice.PAYPALERROR = err.message;
-                        }
-                    }
+                if (!account) {
+                    // tslint:disable-next-line:max-line-length
+                    throw new Error(`${webhook.resource.invoice.total_amount.currency} currency payment account not configured`);
                 }
 
-                invoice.PAYPALINVOICESTATUS = webhook.resource.invoice.status;
-
-                // Update Intacct Invoice
                 try {
-                    this.intacct.update(webhook.resource.invoice.number, invoice);
+                    // Create a payment
+                    // For some reason the object has to be exacly in this order...
+                    // tslint:disable:object-literal-sort-keys
+                    const payment = {
+                        customerid: webhook.resource.invoice.billing_info[0].additional_info,
+                        paymentamount: webhook.resource.invoice.total_amount.value,
+                        bankaccountid: account,
+                        // tslint:disable-next-line:max-line-length
+                        refid: webhook.resource.invoice.payments[webhook.resource.invoice.payments.length - 1].transaction_id,
+                        arpaymentitem: [{
+                            invoicekey: webhook.resource.invoice.number,
+                            amount: webhook.resource.invoice.total_amount.value,
+                        }],
+                    };
+                    await this.intacct.createPayment(payment);
+                    // tslint:enable:object-literal-sort-keys
                 } catch (err) {
                     // tslint:disable-next-line:max-line-length
-                    this.server.log("error", `hapi-paypal-intacct::webhookHandler::UpdateInvoice::INVOICING.INVOICE.PAID::${webhook.resource.invoice.id}::${err.message}`);
-                }
-
-                if (invoice.PAYPALERROR) {
-                    throw new Error(invoice.PAYPALERROR);
+                    const error = JSON.parse(err.message);
+                    // BL03000130 is already paid at intacct. So we should be good.
+                    if (error.length === 1 && error[0].errorno !== "BL03000130") {
+                        intacctInvoice.PAYPALERROR = err.message;
+                    }
                 }
 
                 break;
 
             default:
         }
+
+        intacctInvoice.PAYPALINVOICESTATUS = webhook.resource.invoice.status;
+        await this.intacct.update(webhook.resource.invoice.number, intacctInvoice);
     }
 
     public async validateAccounts() {
@@ -239,165 +223,137 @@ export class HapiPayPalIntacctInvoicing {
             const keys = Object.keys(this.options.paymentaccounts.currencies);
             keys.forEach((key) => configAccounts.push(this.options.paymentaccounts.currencies[key]));
         }
-        try {
-            const accounts = await this.intacct.listAccounts();
-            configAccounts.forEach((account) => {
-                if (!account) {
-                    return;
-                }
-                const filteredAccounts = accounts.filter((faccount: any) => {
-                    return faccount.BANKACCOUNTID === account;
-                });
-                if (filteredAccounts.length < 1) {
-                    throw new Error(`Intacct Payment Account ${account} configured but does not exist in Intacct`);
-                }
+        const accounts = await this.intacct.listAccounts();
+        configAccounts.forEach((account) => {
+            if (!account) {
+                return;
+            }
+            const filteredAccounts = accounts.filter((faccount: any) => {
+                return faccount.BANKACCOUNTID === account;
             });
-        } catch (err) {
-            throw err;
-        }
+            if (filteredAccounts.length < 1) {
+                throw new Error(`Intacct Payment Account ${account} configured but does not exist in Intacct`);
+            }
+        });
     }
 
     public async validateKeys() {
-        try {
-            const inspect = await this.intacct.inspect();
-            Object.keys(intacctInvoiceExtend).forEach((key) => {
-                if ((inspect).indexOf(key) === -1) {
-                    throw new Error(`${key} not defined.  Add the key to the Intacct Invoice object.`);
-                }
-            });
-        } catch (err) {
-            throw err;
-        }
+        const inspect = await this.intacct.inspect();
+        HapiPayPalIntacctInvoicing.intacctKeys.forEach((key) => {
+            if ((inspect).indexOf(key) === -1) {
+                throw new Error(`${key} not defined.  Add the key to the Intacct Invoice object.`);
+            }
+        });
     }
 
     public async refundInvoicesSync() {
-        try {
-            const promises: Array<Promise<any>> = [];
-            const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS = 'PAID'`;
-            const invoices = await this.intacct.query(query);
+        const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS != 'REFUNDED'`;
+        const invoices = await this.intacct.query(query);
+        for (const invoice of invoices) {
             try {
-                invoices.forEach((invoice: any) => promises.push(this.refundInvoiceSync(invoice)));
+                await this.refundInvoiceSync(invoice);
             } catch (err) {
-                this.server.log("error", `hapi-paypal-intacct::refundInvoicesSync::${err.message}`);
+                this.server.log("error", `refundInvoicesSync | ${err.message}`);
             }
-            return Promise.all(promises);
-        } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::refundInvoicesSync::${err.message}`);
-            throw err;
         }
     }
 
     public async refundInvoiceSync(invoice: any) {
-        try {
-            let paypalInvoice;
+        const paypalInvoice = await this.paypal.invoice.get(invoice.PAYPALINVOICEID);
+        const intacctInvoice: any = {
+            PAYPALERROR: "",
+        };
+
+        for (const payment of paypalInvoice.model.payments) {
             try {
-                paypalInvoice = await this.paypal.invoice.get(invoice.PAYPALINVOICEID);
+                await this.paypal.sale.api.refund(payment.transaction_id);
             } catch (err) {
-                throw err;
+                intacctInvoice.PAYPALERROR += JSON.stringify(err);
             }
-            try {
-                const promises: Array<Promise<any>> = [];
-                paypalInvoice.model.payments.forEach(async (payment: any) => {
-                    const sale = await this.paypal.sale.get(payment.transaction_id);
-                    promises.push(sale.refund());
-                });
-                await Promise.all(promises);
-                await this.intacct.update(invoice.RECORDNO, {
-                    PAYPALINVOICESTATUS: paypalInvoice.model.status,
-                });
-            } catch (err) {
-                if (err.message === "Request was refused.This transaction has already been fully refunded") {
-                    try {
-                        await this.intacct.update(invoice.RECORDNO, {
-                            PAYPALINVOICESTATUS: paypalInvoice.model.status,
-                        });
-                    } catch (err) {
-                        // tslint:disable-next-line:max-line-length
-                        this.server.log("error", `hapi-paypal-intacct::refundInvoiceSync::UpdateIntacct::${err.message}`);
-                    }
-                }
-            }
-        } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::refundInvoiceSync::${err.message}`);
         }
+
+        await paypalInvoice.get();
+        this.updateInacctInvoiceWithPayPalModel(intacctInvoice, paypalInvoice);
+        await this.intacct.update(invoice.RECORDNO, intacctInvoice);
     }
 
     public async createInvoiceSync() {
         // tslint:disable-next-line:max-line-length
-        let query = process.env.INTACCT_INVOICE_QUERY || `RAWSTATE = 'A' AND ( PAYPALINVOICESTATUS IN (NULL,'DRAFT') OR PAYPALINVOICEID IS NULL ) AND WHENCREATED > '8/1/2017'`;
+        let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND ( PAYPALINVOICESTATUS IN (NULL,'DRAFT') OR PAYPALINVOICEID IS NULL ) AND WHENCREATED > '8/1/2017'`;
         if (!this.options.autogenerate && !process.env.INTACCT_INVOICE_QUERY) {
             query += ` AND PAYPALINVOICING = 'T'`;
         }
-        const promises: Array<Promise<any>> = [];
-        try {
-            // tslint:disable-next-line:max-line-length
-            const invoices = await Promise.all([this.intacct.query(query, ["RECORDNO"]), this.paypal.invoice.search({ status: ["SENT", "UNPAID"] })]);
-            for (const invoice of invoices[0]) {
-                promises.push(this.syncIntacctToPayPal(invoice));
+
+        const invoices = await Promise.all([
+            this.intacct.query(query, ["RECORDNO"]),
+            this.paypal.invoice.search({ status: ["SENT", "UNPAID"] }),
+        ]);
+
+        for (const invoice of invoices[0]) {
+            const intacctUpdate: any = {
+                PAYPALERROR: "",
+            };
+            let paypalInvoice: InvoiceModel;
+            try {
+                paypalInvoice = await this.syncIntacctToPayPal(invoice);
+            } catch (err) {
+                intacctUpdate.PAYPALERROR = err.message.toString();
+                this.server.log("error", err.toString());
             }
-            await Promise.all(promises);
-            for (const invoice of invoices[1]) {
-                promises.push(this.syncPayPalToIntacct(invoice));
+
+            try {
+                await this.intacct.update(invoice.RECORDNO, this.updateInacctInvoiceWithPayPalModel(
+                    intacctUpdate,
+                    paypalInvoice,
+                ));
+            } catch (err) {
+                this.server.log("error", err.toString());
             }
-            await Promise.all(promises);
-            this.server.log("info", "hapi-paypal-intacct::syncInvoices::Success");
-        } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::syncInvoices::Error::${err.message}`);
+
+        }
+
+        for (const invoice of invoices[1]) {
+            try {
+                await this.syncPayPalToIntacct(invoice);
+            } catch (err) {
+                // tslint:disable-next-line:max-line-length
+                this.server.log("error", `syncPayPalToIntacct | Error: ${err.message}`);
+            }
         }
     }
 
     public async syncIntacctToPayPal(invoice: any) {
         let paypalInvoice;
         let intacctInvoice: any;
-        const intacctUpdate: any = {
-            PAYPALERROR: "",
-        };
-        try {
-            const fullInvoices = await Promise.all([
-                this.intacct.get(invoice.RECORDNO),
-                this.paypal.invoice.search({ number: invoice.RECORDNO }),
-            ]);
-            intacctInvoice = fullInvoices[0];
-            if (fullInvoices[1].length === 1) {
-                paypalInvoice = fullInvoices[1][0];
-                intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
-            } else if (fullInvoices[1].length > 1) {
-                const ids = fullInvoices[1].map((inv: any) => inv.model.id);
-                // tslint:disable-next-line:max-line-length
-                const error = `Multiple PayPal Invoice IDs ${ids}.  You should login to paypal and cancel one.\n`;
-                intacctInvoice.PAYPALERROR += error;
-                this.server.log("warn", error);
-            }
 
-            if (intacctInvoice.PAYPALINVOICEID && paypalInvoice) {
-                await paypalInvoice.update(this.toPaypalInvoice(intacctInvoice));
-            } else if (!intacctInvoice.PAYPALINVOICEID) {
-                // Create a PayPal Invoice
-                paypalInvoice = new this.paypal.invoice(this.toPaypalInvoice(intacctInvoice));
-                await paypalInvoice.create();
-                intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
-            }
-
-            this.updateInacctInvoiceWithPayPalModel(intacctUpdate, paypalInvoice);
-
-            if (paypalInvoice.model.status === "DRAFT") {
-                await paypalInvoice.send();
-            }
-
-            this.updateInacctInvoiceWithPayPalModel(intacctUpdate, paypalInvoice);
-
-        } catch (err) {
+        const fullInvoices = await Promise.all([
+            this.intacct.get(invoice.RECORDNO),
+            this.paypal.invoice.search({ number: invoice.RECORDNO }),
+        ]);
+        intacctInvoice = fullInvoices[0];
+        if (fullInvoices[1].length === 1) {
+            paypalInvoice = fullInvoices[1][0];
+            intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
+        } else if (fullInvoices[1].length > 1) {
+            const ids = fullInvoices[1].map((inv: any) => inv.model.id);
             // tslint:disable-next-line:max-line-length
-            this.server.log("error", `hapi-paypal-intacct::syncInvoices::UpdatePayPal::${invoice.RECORDNO}::${err.message}`);
-            intacctUpdate.PAYPALERROR += `${JSON.stringify(err.message)}\n`;
+            throw new Error(`Multiple PayPal Invoice IDs ${ids}.  You should login to paypal and cancel one.\n`);
         }
 
-        try {
-            await this.intacct.update(intacctInvoice.RECORDNO, intacctUpdate);
-        } catch (err) {
-            // tslint:disable-next-line:max-line-length
-            this.server.log("error", `hapi-paypal-intacct::syncInvoices::UpdateIntacct::${invoice.RECORDNO}::${err.message}`);
+        if (!intacctInvoice.PAYPALINVOICEID && !paypalInvoice) {
+            // Create a PayPal Invoice
+            paypalInvoice = new this.paypal.invoice(this.toPaypalInvoice(intacctInvoice));
+            await paypalInvoice.create();
+            intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
+        } else if (intacctInvoice.PAYPALINVOICEID && paypalInvoice) {
+            await paypalInvoice.update(this.toPaypalInvoice(intacctInvoice));
         }
+
+        if (paypalInvoice.model.status === "DRAFT") {
+            await paypalInvoice.send();
+        }
+
+        return paypalInvoice;
     }
 
     public async syncPayPalToIntacct(invoice: InvoiceModel) {
@@ -423,7 +379,7 @@ export class HapiPayPalIntacctInvoicing {
                 additional_info: intacctInvoice.CUSTOMERID,
                 address: {
                     city: intacctInvoice.BILLTO.MAILADDRESS.CITY,
-                    country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE,
+                    country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE || "US",
                     line1: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS1,
                     line2: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS2,
                     postal_code: intacctInvoice.BILLTO.MAILADDRESS.ZIP,
@@ -449,7 +405,7 @@ export class HapiPayPalIntacctInvoicing {
             shipping_info: {
                 address: {
                     city: intacctInvoice.SHIPTO.MAILADDRESS.CITY,
-                    country_code: intacctInvoice.SHIPTO.MAILADDRESS.COUNTRYCODE,
+                    country_code: intacctInvoice.SHIPTO.MAILADDRESS.COUNTRYCODE || "US",
                     line1: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS1,
                     line2: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS2,
                     postal_code: intacctInvoice.SHIPTO.MAILADDRESS.ZIP,
@@ -516,12 +472,16 @@ export class HapiPayPalIntacctInvoicing {
         }
     }
 
-    private updateInacctInvoiceWithPayPalModel(intacctInvoice: any, paypalInvoice: InvoiceModel) {
+    public updateInacctInvoiceWithPayPalModel(intacctInvoice: any, paypalInvoice: InvoiceModel) {
+        if (!paypalInvoice || !paypalInvoice.model) {
+            return intacctInvoice;
+        }
         intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
         intacctInvoice.PAYPALINVOICESTATUS = paypalInvoice.model.status;
         if (paypalInvoice.model.metadata) {
             intacctInvoice.PAYPALINVOICEURL = paypalInvoice.model.metadata.payer_view_url;
         }
+        return intacctInvoice;
     }
 
 }
