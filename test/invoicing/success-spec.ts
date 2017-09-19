@@ -159,7 +159,7 @@ tape("refundInvoicesSync method success should", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
     const intacctStub = sandbox.stub(invoicing.intacct, "query")
-        .withArgs("RAWSTATE = 'V' AND PAYPALINVOICESTATUS != 'REFUNDED'")
+        .withArgs(sinon.match.string)
         .resolves([mockIntacctRefundedInvoice]);
     const refundStub = sandbox.stub(invoicing, "refundInvoiceSync").resolves();
     await invoicing.refundInvoicesSync();

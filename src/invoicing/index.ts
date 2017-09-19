@@ -245,7 +245,7 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async refundInvoicesSync() {
-        const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS != 'REFUNDED'`;
+        const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED')`;
         const invoices = await this.intacct.query(query);
         for (const invoice of invoices) {
             try {
