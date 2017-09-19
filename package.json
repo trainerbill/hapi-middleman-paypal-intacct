@@ -21,19 +21,19 @@
   "scripts": {
     "clean": "rimraf lib coverage",
     "lint": "tslint --project tsconfig.json --force --format verbose \"src/**/*.ts\"",
-    "build": "npm run clean && npm run lint && echo Using TypeScript && tsc --version && tsc --pretty",
+    "build": "yarn run clean && yarn run lint && echo Using TypeScript && tsc --version && tsc --pretty",
     "test": "nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec; nyc report ---reporter=text",
-    "watch": "npm run build -- --watch",
-    "watch:test": "npm run test -- --watch",
-    "release": "npm test && npm run build && npm version --",
-    "release:quick": "npm test && npm run build && git add -A && git commit -m 'Quick Release Patch' && npm version patch && git push --tags",
-    "postversion": "npm publish && git push && git push --tags",
-    "reinstall": "rimraf node_modules package-lock.json && npm install",
+    "watch": "yarn run build -- --watch",
+    "watch:test": "yarn run test -- --watch",
+    "release": "yarn test && yarn run build && yarn version --",
+    "release:quick": "yarn test && yarn run build && git add -A && git commit -m 'Quick Release Patch' && yarn version patch && git push --tags",
+    "postversion": "yarn publish && git push && git push --tags",
+    "reinstall": "rimraf node_modules package-lock.json && yarn install",
     "start": "ts-node -r dotenv/config ./example/server.ts"
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
-    "hapi-paypal": "^0.0.65",
+    "hapi-paypal": "^0.0.67",
     "later": "^1.2.0"
   },
   "devDependencies": {
