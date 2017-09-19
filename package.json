@@ -30,7 +30,7 @@
     "reinstall": "rimraf node_modules yarn.lock && yarn install",
     "start": "ts-node -r dotenv/config ./example/server.ts",
     "preversion": "yarn test",
-    "postversion": "yarn publish",
+    "postversion": "yarn publish --new-version x.y.z",
     "publish": "git push --tags"
   },
   "dependencies": {
