@@ -143,6 +143,7 @@ export class HapiPayPalIntacctInvoicing {
         this.server = server;
         this.intacct.setServer(this.server);
         this.paypal = server.plugins["hapi-paypal"].paypal;
+        this.options = options;
 
         return this.init()
                 .then(() => next())
@@ -380,7 +381,7 @@ export class HapiPayPalIntacctInvoicing {
                 additional_info: intacctInvoice.CUSTOMERID,
                 address: {
                     city: intacctInvoice.BILLTO.MAILADDRESS.CITY,
-                    country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE || "US",
+                    country_code: intacctInvoice.BILLTO.MAILADDRESS.COUNTRYCODE,
                     line1: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS1,
                     line2: intacctInvoice.BILLTO.MAILADDRESS.ADDRESS2,
                     postal_code: intacctInvoice.BILLTO.MAILADDRESS.ZIP,
