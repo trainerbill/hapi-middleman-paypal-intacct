@@ -25,9 +25,8 @@
     "test": "nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec; nyc report ---reporter=text",
     "watch": "yarn run build -- --watch",
     "watch:test": "yarn run test -- --watch",
-    "release": "yarn test && yarn run build && yarn version --",
-    "release:quick": "yarn test && yarn run build && git add -A && git commit -m 'Quick Release Patch' && yarn version patch && git push --tags",
-    "postversion": "yarn publish && git push && git push --tags",
+    "release": "yarn test && yarn run build && yarn version --new-version --",
+    "release:quick": "yarn test && yarn run build && git add -A && git commit -m 'Quick Release Patch' && yarn version --new-version patch",
     "reinstall": "rimraf node_modules package-lock.json && yarn install",
     "start": "ts-node -r dotenv/config ./example/server.ts"
   },
