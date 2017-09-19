@@ -29,8 +29,7 @@
     "release:quick": "git add -A && git commit -m 'Quick Release Patch' && yarn run release patch",
     "reinstall": "rimraf node_modules yarn.lock && yarn install",
     "start": "ts-node -r dotenv/config ./example/server.ts",
-    "prepublish": "yarn test && yarn run build",
-    "postpublish": "git push && git push --tags"
+    "prepublish": "yarn test && yarn run build"
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
