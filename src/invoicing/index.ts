@@ -129,7 +129,7 @@ export class HapiPayPalIntacctInvoicing {
                 currencies: joi.object().optional(),
                 default: joi.string().required(),
             }).optional(),
-            reminderDays: joi.number().default(30),
+            reminderDays: joi.number().default(15),
         });
         const validate = joi.validate(options, optionsSchema);
         if (validate.error) {
@@ -357,19 +357,20 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async syncPayPalToIntacct(invoice: InvoiceModel) {
-        try {
-            const intacctInvoice = await this.intacct.get(invoice.model.number);
-            if (!intacctInvoice) {
-                await invoice.cancel();
-            } else {
-                const reminder = new Date(invoice.model.metadata.last_sent_date + this.options.reminderDays);
+        const intacctInvoice = await this.intacct.get(invoice.model.number);
+        if (!intacctInvoice) {
+            await invoice.cancel();
+        } else {
+            if (invoice.model.metadata.last_sent_date && this.options.reminderDays) {
+                const lastReminder = new Date(invoice.model.metadata.last_sent_date);
+                const reminder = new Date(lastReminder.setDate(lastReminder.getDate() + this.options.reminderDays));
                 const now = new Date();
                 if (now > reminder) {
                     await invoice.remind();
                 }
+            } else {
+                throw new Error("No last_sent_date property.");
             }
-        } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::syncInvoicePayPalToIntacct::${err.message}`);
         }
     }
 
@@ -446,29 +447,23 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async init() {
-        const promises: Array<Promise<any>> = [];
-        try {
-            this.server.log("info", `hapi-paypal-intacct::initInvoicing::${JSON.stringify(this.options)}.`);
-            await Promise.all([this.validateKeys(), this.validateAccounts()]);
-            if (this.options.cron.create && this.options.cron.create.latertext) {
-                promises.push(this.createInvoiceSync());
-                const timer = later.parse.text(this.options.cron.create.latertext);
-                later.setInterval(this.createInvoiceSync.bind(this), timer);
-                // tslint:disable-next-line:max-line-length
-                this.server.log("info", `hapi-paypal-intacct::initInvoicing::create cron set for ${this.options.cron.create.latertext}.`);
-            }
 
-            if (this.options.cron.refund && this.options.cron.refund.latertext) {
-                promises.push(this.refundInvoicesSync());
-                const refundtimer = later.parse.text(this.options.cron.refund.latertext);
-                later.setInterval(this.refundInvoicesSync.bind(this), refundtimer);
-                // tslint:disable-next-line:max-line-length
-                this.server.log("info", `hapi-paypal-intacct::initInvoicing::refund cron set for ${this.options.cron.refund.latertext}.`);
-            }
-            return await Promise.all(promises);
-        } catch (err) {
-            this.server.log("error", `hapi-paypal-intacct::init::${err.message}`);
-            throw err;
+        await Promise.all([this.validateKeys(), this.validateAccounts()]);
+
+        if (this.options.cron.create && this.options.cron.create.latertext) {
+            await this.createInvoiceSync();
+            const timer = later.parse.text(this.options.cron.create.latertext);
+            later.setInterval(this.createInvoiceSync.bind(this), timer);
+            // tslint:disable-next-line:max-line-length
+            this.server.log("info", `hapi-paypal-intacct::initInvoicing::create cron set for ${this.options.cron.create.latertext}.`);
+        }
+
+        if (this.options.cron.refund && this.options.cron.refund.latertext) {
+            await this.refundInvoicesSync();
+            const refundtimer = later.parse.text(this.options.cron.refund.latertext);
+            later.setInterval(this.refundInvoicesSync.bind(this), refundtimer);
+            // tslint:disable-next-line:max-line-length
+            this.server.log("info", `hapi-paypal-intacct::initInvoicing::refund cron set for ${this.options.cron.refund.latertext}.`);
         }
     }
 

@@ -5,6 +5,7 @@ import {
     mockIntacctRefundedInvoice,
 // tslint:disable-next-line:no-submodule-imports
 } from "hapi-intacct/lib/mocks";
+import * as later from "later";
 import {
     mockPayPalInvoiceDraft,
     mockPaypalInvoicePaid,
@@ -273,7 +274,7 @@ tape("syncIntacctToPayPal method success", async (t) => {
         sandbox.restore();
     });
 
-    t.test("with paypal invoice id should and status draft", async (st) => {
+    t.test("with paypal invoice id and status draft should", async (st) => {
         const invoice = new realPaypal.invoice(mockPayPalInvoiceDraft);
         const intacctGetStub = sandbox.stub(invoicing.intacct, "get")
             .withArgs(mockIntacctInvoicePosted.RECORDNO)
@@ -299,6 +300,82 @@ tape("syncIntacctToPayPal method success", async (t) => {
         st.equal(paypalSearchStub.calledOnce, true, "call paypal search with proper arguments");
         st.equal(paypalUpdateStub.calledOnce, true, "call update on paypal invoice model");
         st.equal(paypalSendStub.calledOnce, true, "call send on paypal invoice model");
+        sandbox.restore();
+    });
+
+});
+
+tape("syncPayPalToIntacct method success", async (t) => {
+    const sandbox = sinon.sandbox.create();
+    const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.paypal = realPaypal;
+    invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
+
+    t.test("reminder should", async (st) => {
+        const invoiceModel = new realPaypal.invoice(mockPayPalInvoiceSent);
+        // Stubs
+        const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
+        const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
+        await invoicing.syncPayPalToIntacct(invoiceModel);
+        st.equal(intacctStub.calledWith(invoiceModel.model.number), true, "call intacct get with invoice RECORDNO");
+        st.equal(remindStub.calledOnce, true, "call models remind method");
+        sandbox.restore();
+    });
+
+    t.test("already reminded should", async (st) => {
+        const invoice = {
+            ...mockPayPalInvoiceSent,
+            ...{
+                metadata: {
+                    last_sent_date: "Tue Sep 19 2050 10:09:23 GMT-0500 (Central Daylight Time)",
+                },
+            },
+        };
+        const invoiceModel = new realPaypal.invoice(invoice);
+        // Stubs
+        const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
+        const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
+        await invoicing.syncPayPalToIntacct(invoiceModel);
+        st.equal(intacctStub.calledWith(invoiceModel.model.number), true, "call intacct get with invoice RECORDNO");
+        st.equal(remindStub.called, false, "not call models remind method");
+        sandbox.restore();
+    });
+
+    t.test("cancel should", async (st) => {
+        const invoiceModel = new realPaypal.invoice(mockPayPalInvoiceSent);
+        // Stubs
+        const cancelStub = sandbox.stub(invoiceModel, "cancel").resolves();
+        const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves();
+        await invoicing.syncPayPalToIntacct(invoiceModel);
+        st.equal(intacctStub.calledWith(invoiceModel.model.number), true, "call intacct get with invoice RECORDNO");
+        st.equal(cancelStub.calledOnce, true, "call models cancel method");
+        sandbox.restore();
+    });
+
+});
+
+tape("init method success", async (t) => {
+    const sandbox = sinon.sandbox.create();
+    const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
+    invoicing.server = new hapi.Server();
+
+    t.test("with all options should", async (st) => {
+        // Stubs
+        const validateAccountsStub = sandbox.stub(invoicing, "validateAccounts").resolves();
+        const validateKeysStub = sandbox.stub(invoicing, "validateKeys").resolves();
+        const laterStub = sandbox.stub(later, "setInterval");
+        const createInvoiceSyncStub = sandbox.stub(invoicing, "createInvoiceSync").resolves();
+        const refundInvoicesSyncStub = sandbox.stub(invoicing, "refundInvoicesSync").resolves();
+
+        await invoicing.init();
+
+        st.equal(validateAccountsStub.calledOnce, true, "call validateAccounts");
+        st.equal(validateAccountsStub.calledOnce, true, "call validateKeys");
+        // tslint:disable-next-line:max-line-length
+        st.equal(laterStub.calledTwice, true, "call later.setInterval twice");
+        st.equal(createInvoiceSyncStub.calledOnce, true, "call createInvoiceSync");
+        st.equal(createInvoiceSyncStub.calledOnce, true, "call refundInvoicesSync");
         sandbox.restore();
     });
 
