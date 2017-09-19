@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
-    "hapi-paypal": "^0.0.67",
+    "hapi-paypal": "^0.0.69",
     "later": "^1.2.0"
   },
   "devDependencies": {
@@ -41,7 +41,7 @@
     "@types/dotenv": "^4.0.0",
     "@types/hapi": "^16.1.6",
     "@types/later": "^1.2.3",
-    "@types/node": "^7.0.0",
+    "@types/node": "^8.0.28",
     "@types/sinon": "^2.3.3",
     "blue-tape": "^1.0.0",
     "coveralls": "^2.0.0",
@@ -51,7 +51,7 @@
     "good-console": "^6.4.0",
     "good-squeeze": "^5.0.2",
     "hapi": "^16.4.3",
-    "nyc": "^10.0.0",
+    "nyc": "^11.2.1",
     "rimraf": "^2.0.0",
     "sinon": "^3.2.1",
     "tap-spec": "^4.1.1",
