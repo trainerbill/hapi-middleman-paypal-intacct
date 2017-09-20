@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
-    "hapi-paypal": "^0.0.71",
+    "hapi-paypal": "^0.0.72",
     "later": "^1.2.0"
   },
   "devDependencies": {
