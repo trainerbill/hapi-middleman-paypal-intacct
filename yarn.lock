@@ -962,9 +962,9 @@ hapi-intacct@^0.0.20:
     intacct-api "^0.2.1"
     joi "^10.6.0"
 
-hapi-paypal@^0.0.69:
-  version "0.0.69"
-  resolved "https://registry.yarnpkg.com/hapi-paypal/-/hapi-paypal-0.0.69.tgz#89ac65c2eb97ccfce0860592cc95042eb29f6118"
+hapi-paypal@^0.0.71:
+  version "0.0.71"
+  resolved "https://registry.yarnpkg.com/hapi-paypal/-/hapi-paypal-0.0.71.tgz#242a1ce40befd26cdaedeeba3ecb24d1c24248a2"
   dependencies:
     joi "^11.0.2"
     paypal-rest-api "^0.0.42"
