@@ -123,7 +123,7 @@ export class HapiPayPalIntacctInvoicing {
             }),
             merchant: invoiceBillingInfoSchema.required(),
             paymentaccounts: joi.object().keys({
-                currencies: joi.object().optional(),
+                currencies: joi.object().default({}),
                 default: joi.string().required(),
             }).optional(),
             reminderDays: joi.number().default(15),
@@ -163,16 +163,8 @@ export class HapiPayPalIntacctInvoicing {
                 // May need to implement a refund at intacct in the future.
                 break;
             case "INVOICING.INVOICE.PAID":
-                // const invoice = await this.intacct.get(webhook.resource.invoice.number);
-
-                const account = this.options.paymentaccounts.currencies ?
-                        this.options.paymentaccounts.currencies[webhook.resource.invoice.total_amount.currency] :
-                        this.options.paymentaccounts.default;
-
-                if (!account) {
-                    // tslint:disable-next-line:max-line-length
-                    throw new Error(`${webhook.resource.invoice.total_amount.currency} currency payment account not configured`);
-                }
+                // tslint:disable-next-line:max-line-length
+                const account = this.options.paymentaccounts.currencies[webhook.resource.invoice.total_amount.currency] || this.options.paymentaccounts.default;
 
                 try {
                     // Create a payment
