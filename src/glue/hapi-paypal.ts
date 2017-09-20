@@ -16,11 +16,11 @@ export const hapiPayPalOptions: IHapiPayPalOptions = {
                     return reply(boom.notFound(error.message));
                 }
                 try {
-                    await hapiPayPalIntacctInvoicing.webhookHandler(request.payload.webhook_event);
+                    await hapiPayPalIntacctInvoicing.webhookHandler(request.payload);
                     return reply("GOT IT!");
                 } catch (err) {
                     // tslint:disable-next-line:max-line-length
-                    request.server.log("error", `webhookEvent: ${JSON.stringify(request.payload.webhook_event)} | Error:${err.message}`);
+                    request.server.log("error", `webhookEvent: ${JSON.stringify(request.payload)} | Error:${err.message}`);
                     return reply(boom.badRequest(err.message));
                 }
             },
