@@ -164,32 +164,10 @@ export class HapiPayPalIntacctInvoicing {
                 break;
             case "INVOICING.INVOICE.PAID":
                 // tslint:disable-next-line:max-line-length
-                const account = this.options.paymentaccounts.currencies[webhook.resource.invoice.total_amount.currency] || this.options.paymentaccounts.default;
-
                 try {
-                    // Create a payment
-                    // For some reason the object has to be exacly in this order...
-                    // tslint:disable:object-literal-sort-keys
-                    const payment = {
-                        customerid: webhook.resource.invoice.billing_info[0].additional_info,
-                        paymentamount: webhook.resource.invoice.total_amount.value,
-                        bankaccountid: account,
-                        // tslint:disable-next-line:max-line-length
-                        refid: webhook.resource.invoice.payments[webhook.resource.invoice.payments.length - 1].transaction_id,
-                        arpaymentitem: [{
-                            invoicekey: webhook.resource.invoice.number,
-                            amount: webhook.resource.invoice.total_amount.value,
-                        }],
-                    };
-                    await this.intacct.createPayment(payment);
-                    // tslint:enable:object-literal-sort-keys
+                    await this.createPayment(webhook.resource.invoice);
                 } catch (err) {
-                    // tslint:disable-next-line:max-line-length
-                    const error = JSON.parse(err.message);
-                    // BL03000130 is already paid at intacct. So we should be good.
-                    if (error.length === 1 && error[0].errorno !== "BL03000130") {
-                        intacctInvoice.PAYPALERROR = err.message;
-                    }
+                    intacctInvoice.PAYPALERROR = err.message;
                 }
 
                 break;
@@ -199,6 +177,38 @@ export class HapiPayPalIntacctInvoicing {
 
         intacctInvoice.PAYPALINVOICESTATUS = webhook.resource.invoice.status;
         await this.intacct.update(webhook.resource.invoice.number, intacctInvoice);
+    }
+
+    public async createPayment(invoice: IInvoice) {
+        // tslint:disable-next-line:max-line-length
+        const account = this.options.paymentaccounts.currencies[invoice.total_amount.currency] || this.options.paymentaccounts.default;
+        try {
+            // Create a payment
+            // For some reason the object has to be exacly in this order...
+            // tslint:disable:object-literal-sort-keys
+            const payment = {
+                customerid: invoice.billing_info[0].additional_info,
+                paymentamount: invoice.total_amount.value,
+                bankaccountid: account,
+                // tslint:disable-next-line:max-line-length
+                refid: invoice.payments[invoice.payments.length - 1].transaction_id,
+                paymentmethod: "Credit Card",
+                arpaymentitem: [{
+                    invoicekey: invoice.number,
+                    amount: invoice.total_amount.value,
+                }],
+            };
+
+            return await this.intacct.createPayment(payment);
+            // tslint:enable:object-literal-sort-keys
+        } catch (err) {
+            // tslint:disable-next-line:max-line-length
+            const error = JSON.parse(err.message);
+            // BL03000130 is already paid at intacct. So we should be good.
+            if (error.length === 1 && error[0].errorno !== "BL03000130") {
+                throw err;
+            }
+        }
     }
 
     public async validateAccounts() {
@@ -268,6 +278,7 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async createInvoiceSync() {
+        // TODO.  Do something about WHENCREATED
         // tslint:disable-next-line:max-line-length
         let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND ( PAYPALINVOICESTATUS IN (NULL,'DRAFT') OR PAYPALINVOICEID IS NULL ) AND WHENCREATED > '8/1/2017'`;
         if (!this.options.autogenerate && !process.env.INTACCT_INVOICE_QUERY) {
@@ -341,6 +352,8 @@ export class HapiPayPalIntacctInvoicing {
 
         if (paypalInvoice.model.status === "DRAFT") {
             await paypalInvoice.send();
+        } else if (paypalInvoice.model.status === "PAID" || paypalInvoice.model.status === "MARKED_AS_PAID") {
+            await this.createPayment(paypalInvoice.model);
         }
 
         return paypalInvoice;

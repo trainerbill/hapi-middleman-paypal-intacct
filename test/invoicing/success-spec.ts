@@ -131,6 +131,7 @@ tape("webhookHandler method success", async (t) => {
             paymentamount: event.resource.invoice.total_amount.value,
             bankaccountid: hapiPayPalIntacctInvoicingPlugin.options.paymentaccounts.currencies.USD,
             refid: event.resource.invoice.payments[event.resource.invoice.payments.length - 1].transaction_id,
+            paymentmethod: "Credit Card",
             arpaymentitem: [{
                 amount: event.resource.invoice.total_amount.value,
                 invoicekey: event.resource.invoice.number,
