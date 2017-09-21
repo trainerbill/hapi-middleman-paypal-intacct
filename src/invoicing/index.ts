@@ -249,7 +249,7 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async refundInvoicesSync() {
-        const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED')`;
+        const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')`;
         const invoices = await this.intacct.query(query);
         for (const invoice of invoices) {
             try {
@@ -265,12 +265,13 @@ export class HapiPayPalIntacctInvoicing {
         const intacctInvoice: any = {
             PAYPALERROR: "",
         };
-
-        for (const payment of paypalInvoice.model.payments) {
-            try {
-                await this.paypal.sale.api.refund(payment.transaction_id);
-            } catch (err) {
-                intacctInvoice.PAYPALERROR += JSON.stringify(err);
+        if (paypalInvoice.model.payments) {
+            for (const payment of paypalInvoice.model.payments) {
+                try {
+                    await this.paypal.sale.api.refund(payment.transaction_id);
+                } catch (err) {
+                    intacctInvoice.PAYPALERROR += err.message;
+                }
             }
         }
 
