@@ -248,7 +248,7 @@ tape("createInvoiceSync method success should", async (t) => {
     sandbox.restore();
 });
 
-tape.only("syncIntacctToPayPal method success", async (t) => {
+tape("syncIntacctToPayPal method success", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
     invoicing.paypal = realPaypal;
