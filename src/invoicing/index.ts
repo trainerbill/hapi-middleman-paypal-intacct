@@ -283,7 +283,7 @@ export class HapiPayPalIntacctInvoicing {
     public async createInvoiceSync() {
         // TODO.  Do something about WHENCREATED
         // tslint:disable-next-line:max-line-length
-        let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND PAYPALINVOICESTATUS NOT IN ('CANCELLED') AND TOTALDUE NOT IN (0) AND WHENCREATED > '8/1/2017'`;
+        let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0) AND WHENCREATED > '8/1/2017'`;
         if (!this.options.autogenerate && !process.env.INTACCT_INVOICE_QUERY) {
             query += ` AND PAYPALINVOICING = 'T'`;
         }
