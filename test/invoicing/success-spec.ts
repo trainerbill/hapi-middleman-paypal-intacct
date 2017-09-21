@@ -260,7 +260,7 @@ tape("syncIntacctToPayPal method success", async (t) => {
             .resolves(mockIntacctInvoicePosted);
 
         const paypalSearchStub = sandbox.stub(invoicing.paypal.invoice, "search")
-            .withArgs({ number: mockIntacctInvoicePosted.RECORDID })
+            .withArgs({ number: mockIntacctInvoicePosted.RECORDNO })
             .resolves([]);
 
         const paypalCreateStub = sandbox.stub(invoicing.paypal.invoice.api, "create")
