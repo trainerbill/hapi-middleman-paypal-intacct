@@ -19,7 +19,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "coverage": "nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec && nyc report ---reporter=text",
+    "coverage": "nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec && nyc report",
     "clean": "rimraf lib coverage",
     "lint": "tslint --project tsconfig.json --force --format verbose \"src/**/*.ts\"",
     "build": "yarn run clean && yarn run lint && echo Using TypeScript && tsc --version && tsc --pretty",
@@ -63,21 +63,5 @@
   },
   "engines": {
     "node": ">=6.0.0"
-  },
-  "nyc": {
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "lib"
-    ],
-    "extension": [
-      ".ts"
-    ],
-    "require": [
-      "ts-node/register",
-      "dotenv/config"
-    ],
-    "reporter": []
   }
 }
