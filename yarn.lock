@@ -962,12 +962,12 @@ hapi-intacct@^0.0.20:
     intacct-api "^0.2.1"
     joi "^10.6.0"
 
-hapi-paypal@^0.0.77:
-  version "0.0.77"
-  resolved "https://registry.yarnpkg.com/hapi-paypal/-/hapi-paypal-0.0.77.tgz#258a0a0ae0627ce134e267ea0366b1948e41e85a"
+hapi-paypal@^0.0.78:
+  version "0.0.78"
+  resolved "https://registry.yarnpkg.com/hapi-paypal/-/hapi-paypal-0.0.78.tgz#9e7a6c825c70b8e1a26c9cbbcb0931118e9a0f47"
   dependencies:
     joi "^11.0.3"
-    paypal-rest-api "^0.0.45"
+    paypal-rest-api "^0.0.47"
     us "^2.0.0"
 
 "hapi@11.x.x || 12.x.x || 13.x.x || 14.x.x || 15.x.x || 16.x.x", hapi@^16.4.3:
@@ -1878,9 +1878,9 @@ path-type@^2.0.0:
   dependencies:
     pify "^2.0.0"
 
-paypal-rest-api@^0.0.45:
-  version "0.0.45"
-  resolved "https://registry.yarnpkg.com/paypal-rest-api/-/paypal-rest-api-0.0.45.tgz#25fe8e5dd4019c17b1b461472d8f3b4d76d5351e"
+paypal-rest-api@^0.0.47:
+  version "0.0.47"
+  resolved "https://registry.yarnpkg.com/paypal-rest-api/-/paypal-rest-api-0.0.47.tgz#b6c8a835d33175a0a4d1263e7c43320fccfd3e8a"
   dependencies:
     "@types/joi" "^10.4.1"
     "@types/lodash.get" "^4.4.3"

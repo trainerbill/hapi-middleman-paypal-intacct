@@ -248,7 +248,7 @@ tape("createInvoiceSync method success should", async (t) => {
     sandbox.restore();
 });
 
-tape("syncIntacctToPayPal method success", async (t) => {
+tape.only("syncIntacctToPayPal method success", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
     invoicing.paypal = realPaypal;
@@ -264,14 +264,20 @@ tape("syncIntacctToPayPal method success", async (t) => {
             .withArgs({ number: mockIntacctInvoicePosted.RECORDNO })
             .resolves([]);
 
-        const paypalCreateStub = sandbox.stub(invoicing.paypal.invoice.prototype, "create")
-            .resolves();
+        const paypalCreateStub = sandbox.stub(invoicing.paypal.invoice.api, "create")
+            .resolves({
+                body: mockPayPalInvoiceDraft,
+            });
+        const paypalSendStub = sandbox.stub(invoicing.paypal.invoice.prototype, "send").resolves();
+        const paypalUpdateStub = sandbox.stub(invoicing.paypal.invoice.prototype, "update").resolves();
 
         await invoicing.syncIntacctToPayPal(mockIntacctInvoicePosted);
 
         st.equal(intacctGetStub.calledOnce, true, "call intacct get with proper arguments");
         st.equal(paypalSearchStub.calledOnce, true, "call paypal search with proper arguments");
         st.equal(paypalCreateStub.calledOnce, true, "call create on paypal invoice model");
+        st.equal(paypalSendStub.calledOnce, true, "call send on invoice model");
+        st.equal(paypalUpdateStub.called, false, "not call send on invoice model");
         sandbox.restore();
     });
 

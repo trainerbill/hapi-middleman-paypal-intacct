@@ -180,6 +180,9 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async createPayment(invoice: IInvoice) {
+        if (invoice.status !== "PAID" && invoice.status !== "MARKED_AS_PAID") {
+            throw new Error("Invalid Status");
+        }
         // tslint:disable-next-line:max-line-length
         const account = this.options.paymentaccounts.currencies[invoice.total_amount.currency] || this.options.paymentaccounts.default;
         try {
@@ -286,7 +289,7 @@ export class HapiPayPalIntacctInvoicing {
         }
 
         const invoices = await Promise.all([
-            this.intacct.query(query, ["RECORDNO"]),
+            this.intacct.query(query, ["RECORDNO", "PAYPALINVOICEID", "RECORDID"]),
             this.paypal.invoice.search({ status: ["SENT", "UNPAID"] }),
         ]);
 
@@ -324,36 +327,52 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async syncIntacctToPayPal(invoice: any) {
-        let paypalInvoice;
-        let intacctInvoice: any;
-
-        const fullInvoices = await Promise.all([
-            this.intacct.get(invoice.RECORDNO),
-            this.paypal.invoice.search({ number: invoice.RECORDNO }),
-        ]);
-        intacctInvoice = fullInvoices[0];
-        if (fullInvoices[1].length === 1) {
-            paypalInvoice = fullInvoices[1][0];
-            intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
-        } else if (fullInvoices[1].length > 1) {
-            const ids = fullInvoices[1].map((inv: any) => inv.model.id);
-            // tslint:disable-next-line:max-line-length
-            throw new Error(`Multiple PayPal Invoice IDs ${ids}.  You should login to paypal and cancel one.\n`);
+        const promises = [];
+        promises.push(this.intacct.get(invoice.RECORDNO));
+        if (invoice.PAYPALINVOICEID) {
+            promises.push(this.paypal.invoice.get(invoice.PAYPALINVOICEID));
+        } else {
+            promises.push(this.paypal.invoice.search({ number: invoice.RECORDNO }));
         }
 
-        if (!intacctInvoice.PAYPALINVOICEID && !paypalInvoice) {
-            // Create a PayPal Invoice
+        const invoices = await Promise.all(promises);
+        const intacctInvoice = invoices[0];
+        let paypalInvoice: InvoiceModel;
+        if (Array.isArray(invoices[1])) {
+            if (invoices[1].length > 0) {
+                paypalInvoice = invoices[1][0];
+            }
+        } else {
+            paypalInvoice = invoices[1];
+        }
+
+        if (!paypalInvoice) {
             paypalInvoice = new this.paypal.invoice(this.toPaypalInvoice(intacctInvoice));
             await paypalInvoice.create();
-            intacctInvoice.PAYPALINVOICEID = paypalInvoice.model.id;
-        } else if (intacctInvoice.PAYPALINVOICEID && paypalInvoice) {
-            await paypalInvoice.update(this.toPaypalInvoice(intacctInvoice));
+        } else {
+            try {
+                await paypalInvoice.update(this.toPaypalInvoice(intacctInvoice));
+            } catch (err) {
+                if (err.message !== "Invalid Status") {
+                    throw err;
+                }
+            }
         }
 
-        if (paypalInvoice.model.status === "DRAFT") {
+        try {
             await paypalInvoice.send();
-        } else if (paypalInvoice.model.status === "PAID" || paypalInvoice.model.status === "MARKED_AS_PAID") {
+        } catch (err) {
+            if (err.message !== "Invalid Status") {
+                throw err;
+            }
+        }
+
+        try {
             await this.createPayment(paypalInvoice.model);
+        } catch (err) {
+            if (err.message !== "Invalid Status") {
+                throw err;
+            }
         }
 
         return paypalInvoice;
