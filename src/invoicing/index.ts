@@ -180,7 +180,7 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async createPayment(invoice: IInvoice) {
-        if (invoice.status !== "PAID" && invoice.status !== "MARKED_AS_PAID") {
+        if (invoice.status !== "PAID") {
             throw new Error("Invalid Status");
         }
         // tslint:disable-next-line:max-line-length
@@ -193,7 +193,6 @@ export class HapiPayPalIntacctInvoicing {
                 customerid: invoice.billing_info[0].additional_info,
                 paymentamount: invoice.total_amount.value,
                 bankaccountid: account,
-                // tslint:disable-next-line:max-line-length
                 refid: invoice.payments[invoice.payments.length - 1].transaction_id,
                 paymentmethod: "Credit Card",
                 arpaymentitem: [{
@@ -283,7 +282,7 @@ export class HapiPayPalIntacctInvoicing {
     public async createInvoiceSync() {
         // TODO.  Do something about WHENCREATED
         // tslint:disable-next-line:max-line-length
-        let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND ( PAYPALINVOICESTATUS IN (NULL,'DRAFT') OR PAYPALINVOICEID IS NULL ) AND WHENCREATED > '8/1/2017'`;
+        let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND PAYPALINVOICESTATUS NOT IN ('CANCELLED') AND TOTALDUE NOT IN (0) AND WHENCREATED > '8/1/2017'`;
         if (!this.options.autogenerate && !process.env.INTACCT_INVOICE_QUERY) {
             query += ` AND PAYPALINVOICING = 'T'`;
         }
