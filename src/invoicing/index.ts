@@ -331,7 +331,7 @@ export class HapiPayPalIntacctInvoicing {
         if (invoice.PAYPALINVOICEID) {
             promises.push(this.paypal.invoice.get(invoice.PAYPALINVOICEID));
         } else {
-            promises.push(this.paypal.invoice.search({ number: invoice.RECORDNO }));
+            promises.push(this.paypal.invoice.search({ number: invoice.RECORDID }));
         }
 
         const invoices = await Promise.all(promises);
@@ -419,10 +419,10 @@ export class HapiPayPalIntacctInvoicing {
             items: this.toPayPalLineItems(intacctInvoice.ARINVOICEITEMS.arinvoiceitem),
             merchant_info: this.options.merchant,
             note: intacctInvoice.CUSTMESSAGE.MESSAGE,
-            number: intacctInvoice.RECORDNO,
+            number: intacctInvoice.RECORDID,
             payment_term: {
                 due_date: intacctInvoice.WHENDUE + " PDT",
-                term_type: intacctInvoice.TERMNAME,
+                // term_type: intacctInvoice.TERMNAME,
             },
             shipping_info: {
                 address: {

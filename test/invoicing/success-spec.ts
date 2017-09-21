@@ -210,11 +210,10 @@ tape("createInvoiceSync method success should", async (t) => {
     // Stubs
     const intacctInvoices = [{ RECORDNO: "id" }, { RECORDNO: "id1"}];
     const intacctQueryStub = sandbox.stub(invoicing.intacct, "query")
-        .withArgs(process.env.INTACCT_INVOICE_CREATE_QUERY, ["RECORDNO"])
+        .withArgs(sinon.match.string, sinon.match.array)
         .resolves(intacctInvoices);
     const paypalInvoices = [{ id: "paypalid" }, { id: "paypalid1"}];
     const paypalSearchStub = sandbox.stub(realPaypal.invoice, "search")
-        .withArgs({ status: ["SENT", "UNPAID"] })
         .resolves(paypalInvoices);
     const invoicingStub1 = sandbox.stub(invoicing, "syncIntacctToPayPal")
         .resolves(invoice);
@@ -254,14 +253,14 @@ tape("syncIntacctToPayPal method success", async (t) => {
     invoicing.paypal = realPaypal;
     invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
 
-    t.test("with no paypal invoice id should", async (st) => {
+    t.test("new invoice should", async (st) => {
 
         const intacctGetStub = sandbox.stub(invoicing.intacct, "get")
             .withArgs(mockIntacctInvoicePosted.RECORDNO)
             .resolves(mockIntacctInvoicePosted);
 
         const paypalSearchStub = sandbox.stub(invoicing.paypal.invoice, "search")
-            .withArgs({ number: mockIntacctInvoicePosted.RECORDNO })
+            .withArgs({ number: mockIntacctInvoicePosted.RECORDID })
             .resolves([]);
 
         const paypalCreateStub = sandbox.stub(invoicing.paypal.invoice.api, "create")
@@ -281,7 +280,7 @@ tape("syncIntacctToPayPal method success", async (t) => {
         sandbox.restore();
     });
 
-    t.test("with paypal invoice id and status draft should", async (st) => {
+    t.test("draft invoice should", async (st) => {
         const invoice = new realPaypal.invoice(mockPayPalInvoiceDraft);
         const intacctGetStub = sandbox.stub(invoicing.intacct, "get")
             .withArgs(mockIntacctInvoicePosted.RECORDNO)
@@ -293,7 +292,6 @@ tape("syncIntacctToPayPal method success", async (t) => {
             });
 
         const paypalSearchStub = sandbox.stub(invoicing.paypal.invoice, "search")
-            .withArgs({ number: mockIntacctInvoicePosted.RECORDNO })
             .resolves([invoice]);
 
         const paypalUpdateStub = sandbox.stub(invoicing.paypal.invoice.prototype, "update")
