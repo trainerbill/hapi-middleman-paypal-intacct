@@ -93,7 +93,7 @@ tape("invoice paid event failure", async (t) => {
         refid: event.resource.invoice.payments[event.resource.invoice.payments.length - 1].transaction_id,
         arpaymentitem: [{
             amount: event.resource.invoice.total_amount.value,
-            invoicekey: event.resource.invoice.number,
+            invoicekey: event.resource.invoice.reference,
         }],
     };
     // tslint:enable
@@ -108,7 +108,7 @@ tape("invoice paid event failure", async (t) => {
             message: JSON.stringify(error),
         });
         const intacctUpdateStub = sandbox.stub(invoicing.intacct, "update")
-            .withArgs(event.resource.invoice.number, {
+            .withArgs(event.resource.invoice.reference, {
                 PAYPALERROR: JSON.stringify(error),
                 PAYPALINVOICESTATUS: event.resource.invoice.status,
             })
@@ -129,7 +129,7 @@ tape("invoice paid event failure", async (t) => {
             message: JSON.stringify(error),
         });
         const intacctUpdateStub = sandbox.stub(invoicing.intacct, "update")
-            .withArgs(event.resource.invoice.number, {
+            .withArgs(event.resource.invoice.reference, {
                 PAYPALERROR: "",
                 PAYPALINVOICESTATUS: event.resource.invoice.status,
             })

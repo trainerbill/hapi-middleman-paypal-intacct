@@ -141,7 +141,6 @@ export class HapiPayPalIntacctInvoicing {
         this.intacct.setServer(this.server);
         this.paypal = server.plugins["hapi-paypal"].paypal;
         this.options = options;
-
         return this.init()
                 .then(() => next())
                 .catch((err) => {
@@ -176,7 +175,7 @@ export class HapiPayPalIntacctInvoicing {
         }
 
         intacctInvoice.PAYPALINVOICESTATUS = webhook.resource.invoice.status;
-        await this.intacct.update(webhook.resource.invoice.number, intacctInvoice);
+        await this.intacct.update(webhook.resource.invoice.reference, intacctInvoice);
     }
 
     public async createPayment(invoice: IInvoice) {
@@ -196,7 +195,7 @@ export class HapiPayPalIntacctInvoicing {
                 refid: invoice.payments[invoice.payments.length - 1].transaction_id,
                 paymentmethod: "Credit Card",
                 arpaymentitem: [{
-                    invoicekey: invoice.number,
+                    invoicekey: invoice.reference,
                     amount: invoice.total_amount.value,
                 }],
             };
@@ -289,7 +288,7 @@ export class HapiPayPalIntacctInvoicing {
         }
 
         const invoices = await Promise.all([
-            this.intacct.query(query, ["RECORDNO", "PAYPALINVOICEID"]),
+            this.intacct.query(query, ["RECORDNO", "RECORDID", "PAYPALINVOICEID"]),
             this.paypal.invoice.search({ status: ["SENT", "UNPAID"] }),
         ]);
 
@@ -327,24 +326,13 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async syncIntacctToPayPal(invoice: any) {
-        const promises = [];
-        promises.push(this.intacct.get(invoice.RECORDNO));
-        if (invoice.PAYPALINVOICEID) {
-            promises.push(this.paypal.invoice.get(invoice.PAYPALINVOICEID));
-        } else {
-            promises.push(this.paypal.invoice.search({ number: invoice.RECORDNO }));
-        }
 
-        const invoices = await Promise.all(promises);
+        const invoices = await Promise.all([
+            this.intacct.get(invoice.RECORDNO),
+            this.paypal.invoice.search({ number: invoice.RECORDID }),
+        ]);
         const intacctInvoice = invoices[0];
-        let paypalInvoice: InvoiceModel;
-        if (Array.isArray(invoices[1])) {
-            if (invoices[1].length > 0) {
-                paypalInvoice = invoices[1][0];
-            }
-        } else {
-            paypalInvoice = invoices[1];
-        }
+        let paypalInvoice = invoices[1][0];
 
         if (!paypalInvoice) {
             paypalInvoice = new this.paypal.invoice(this.toPaypalInvoice(intacctInvoice));
@@ -379,7 +367,7 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async syncPayPalToIntacct(invoice: InvoiceModel) {
-        const intacctInvoice = await this.intacct.get(invoice.model.number);
+        const intacctInvoice = await this.intacct.get(invoice.model.reference);
         if (!intacctInvoice) {
             await invoice.cancel();
         } else {
@@ -420,11 +408,12 @@ export class HapiPayPalIntacctInvoicing {
             items: this.toPayPalLineItems(intacctInvoice.ARINVOICEITEMS.arinvoiceitem),
             merchant_info: this.options.merchant,
             note: intacctInvoice.CUSTMESSAGE.MESSAGE,
-            number: intacctInvoice.RECORDNO,
+            number: intacctInvoice.RECORDID,
             payment_term: {
                 due_date: intacctInvoice.WHENDUE + " PDT",
                 // term_type: intacctInvoice.TERMNAME,
             },
+            reference: intacctInvoice.RECORDNO,
             shipping_info: {
                 address: {
                     city: intacctInvoice.SHIPTO.MAILADDRESS.CITY,

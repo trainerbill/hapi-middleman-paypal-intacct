@@ -93,7 +93,7 @@ tape("webhookHandler method success", async (t) => {
             ...refundEvent,
         };
         const intacctStub = sandbox.stub(invoicing.intacct, "update")
-            .withArgs(event.resource.invoice.number, {
+            .withArgs(event.resource.invoice.reference, {
                 PAYPALERROR: "",
                 PAYPALINVOICESTATUS: event.resource.invoice.status,
             })
@@ -109,7 +109,7 @@ tape("webhookHandler method success", async (t) => {
             ...cancelEvent,
         };
         const intacctStub = sandbox.stub(invoicing.intacct, "update")
-            .withArgs(event.resource.invoice.number, {
+            .withArgs(event.resource.invoice.reference, {
                 PAYPALERROR: "",
                 PAYPALINVOICESTATUS: event.resource.invoice.status,
             })
@@ -134,7 +134,7 @@ tape("webhookHandler method success", async (t) => {
             paymentmethod: "Credit Card",
             arpaymentitem: [{
                 amount: event.resource.invoice.total_amount.value,
-                invoicekey: event.resource.invoice.number,
+                invoicekey: event.resource.invoice.reference,
             }],
         };
         // tslint:enable
@@ -143,7 +143,7 @@ tape("webhookHandler method success", async (t) => {
             .resolves();
 
         const intacctUpdateStub = sandbox.stub(invoicing.intacct, "update")
-            .withArgs(event.resource.invoice.number, {
+            .withArgs(event.resource.invoice.reference, {
                 PAYPALERROR: "",
                 PAYPALINVOICESTATUS: event.resource.invoice.status,
             })
@@ -260,7 +260,7 @@ tape("syncIntacctToPayPal method success", async (t) => {
             .resolves(mockIntacctInvoicePosted);
 
         const paypalSearchStub = sandbox.stub(invoicing.paypal.invoice, "search")
-            .withArgs({ number: mockIntacctInvoicePosted.RECORDNO })
+            .withArgs({ number: mockIntacctInvoicePosted.RECORDID })
             .resolves([]);
 
         const paypalCreateStub = sandbox.stub(invoicing.paypal.invoice.api, "create")
@@ -322,7 +322,7 @@ tape("syncPayPalToIntacct method success", async (t) => {
         const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
         await invoicing.syncPayPalToIntacct(invoiceModel);
-        st.equal(intacctStub.calledWith(invoiceModel.model.number), true, "call intacct get with invoice RECORDNO");
+        st.equal(intacctStub.calledWith(invoiceModel.model.reference), true, "call intacct get with invoice RECORDNO");
         st.equal(remindStub.calledOnce, true, "call models remind method");
         sandbox.restore();
     });
@@ -341,7 +341,7 @@ tape("syncPayPalToIntacct method success", async (t) => {
         const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
         await invoicing.syncPayPalToIntacct(invoiceModel);
-        st.equal(intacctStub.calledWith(invoiceModel.model.number), true, "call intacct get with invoice RECORDNO");
+        st.equal(intacctStub.calledWith(invoiceModel.model.reference), true, "call intacct get with invoice RECORDNO");
         st.equal(remindStub.called, false, "not call models remind method");
         sandbox.restore();
     });
@@ -352,7 +352,7 @@ tape("syncPayPalToIntacct method success", async (t) => {
         const cancelStub = sandbox.stub(invoiceModel, "cancel").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves();
         await invoicing.syncPayPalToIntacct(invoiceModel);
-        st.equal(intacctStub.calledWith(invoiceModel.model.number), true, "call intacct get with invoice RECORDNO");
+        st.equal(intacctStub.calledWith(invoiceModel.model.reference), true, "call intacct get with invoice RECORDNO");
         st.equal(cancelStub.calledOnce, true, "call models cancel method");
         sandbox.restore();
     });
