@@ -429,7 +429,7 @@ export class HapiPayPalIntacctInvoicing {
             tax_inclusive: true,
         };
 
-        return paypalInvoice;
+        return JSON.parse(JSON.stringify(paypalInvoice));
     }
 
     public toPayPalLineItems(arrInvoiceItems: any) {
