@@ -53,70 +53,70 @@ Required environment variables for invoicing functionality
 PayPal Merchant Email.  This is required to be the email address associated with your REST client id.<br/>
 
 #### INTACCT_INVOICE_PAYMENT_DEFAULT_ACCOUNT
-The default Intacct account id to submit payments against.  If a currency account is not setup it will automatically submit payments to this account.
+The default Intacct account id to submit payments against.  If a currency account is not setup it will automatically submit payments to this account.<br/>
 
 #### INTACCT_INVOICE_START_DATE
-Sets the date to start picking up invoices.  Set this to your go live date.  valid dates are MM/DD/YYYY
+Sets the date to start picking up invoices.  Set this to your go live date.  valid dates are MM/DD/YYYY<br/>
 
 ## Optional Invoicing Variables
-Optional environment variables for invoicing functionality
+Optional environment variables for invoicing functionality<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_FIRST_NAME
-Biller first name that shows up on invoice
+Biller first name that shows up on invoice<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_LAST_NAME
-Biller last name that shows up on invoice
+Biller last name that shows up on invoice<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_BUSINESS_NAME
-Biller business name that shows up on invoice
+Biller business name that shows up on invoice<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_PHONE_COUNTRY_CODE
-Biller phone country code that shows up on invoice
-**Default: 1**
+Biller phone country code that shows up on invoice<br/>
+**Default: 1**<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_PHONE_NUMBER
-Biller phone number that shows up on invoice
+Biller phone number that shows up on invoice<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE1
-Biller street address that shows up on invoice
+Biller street address that shows up on invoice<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE2
-Biller additional street address that shows up on invoice
+Biller additional street address that shows up on invoice<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_ADDRESS_CITY
-Biller city address that shows up on invoice
+Biller city address that shows up on invoice<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_ADDRESS_STATE
-Biller additional state address that shows up on invoice
-**2 character state**
+Biller additional state address that shows up on invoice<br/>
+**2 character state**<br/>
 
 #### PAYPAL_INVOICE_MERCHANT_COUNTRY_POSTAL_CODE
-Biller zip code that shows up on invoice
+Biller zip code that shows up on invoice<br/>
 
 #### INTACCT_INVOICE_CREATE_QUERY
-Override the default intacct query for invoices to create.
-**Default: "RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0)"**
+Override the default intacct query for invoices to create.<br/>
+**Default: "RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0)"**<br/>
 
 #### INTACCT_INVOICE_CREATE_AUTO
-Controls automatic creation of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field
-**Default: true**
+Controls automatic creation of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field<br/>
+**Default: true**<br/>
 
 #### INTACCT_INVOICE_CREATE_LATER
-Controls the cron job for creating invoices.  Anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example)
-**Default: "every 1 hour"**
+Controls the cron job for creating invoices.  Anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example)<br/>
+**Default: "every 1 hour"**<br/>
 
 #### INTACCT_INVOICE_REFUND_QUERY
-Override the default intacct query for invoices to refund.
-**Default: "RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')"**
+Override the default intacct query for invoices to refund.<br/>
+**Default: "RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')"**<br/>
 
 #### INTACCT_INVOICE_REFUND_AUTO
-Controls automatic refunding of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field
-**Default: true**
+Controls automatic refunding of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field<br/>
+**Default: true**<br/>
 
 #### INTACCT_INVOICE_REFUND_LATER
-Controls the cron job for refunding invoices.  Anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example)
-**Default: "every 1 hour"**
+Controls the cron job for refunding invoices.  Anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example)<br/>
+**Default: "every 1 hour"**<br/>
 
 #### INTACCT_INVOICE_PAYMENT_USD_ACCOUNT
-he intacct account to submit payments of USD to.  If set then PayPal invoices of type USD will go to this intacct account.
+he intacct account to submit payments of USD to.  If set then PayPal invoices of type USD will go to this intacct account.<br/>
 
