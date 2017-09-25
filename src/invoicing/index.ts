@@ -428,8 +428,8 @@ export class HapiPayPalIntacctInvoicing {
             },
             tax_inclusive: true,
         };
-
-        return JSON.parse(JSON.stringify(paypalInvoice));
+        // Change "" to undefined
+        return JSON.parse(JSON.stringify(paypalInvoice, (k, v) => ((v === "") ? undefined : v)));
     }
 
     public toPayPalLineItems(arrInvoiceItems: any) {
