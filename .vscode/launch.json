@@ -15,7 +15,7 @@
                 "dotenv/config",
                 "./node_modules/.bin/tape",
                 "test/**/*-spec.ts",
-                "dotenv_config_path=./test/.env"]
+                "dotenv_config_path=.env.test"]
         },
         {
             "type": "node",
@@ -27,7 +27,7 @@
                 "dotenv/config",
                 "./node_modules/.bin/tape",
                 "${file}",
-                "dotenv_config_path=./test/.env"]
+                "dotenv_config_path=.env.test"]
         },
         {
             "type": "node",

@@ -159,6 +159,7 @@ tape("webhookHandler method success", async (t) => {
 tape("refundInvoicesSync method success should", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
     const intacctStub = sandbox.stub(invoicing.intacct, "query")
         .withArgs(sinon.match.string)
         .resolves([mockIntacctRefundedInvoice]);

@@ -399,7 +399,7 @@ export class HapiPayPalIntacctInvoicing {
                 first_name: intacctInvoice.BILLTO.FIRSTNAME,
                 last_name: intacctInvoice.BILLTO.LASTNAME,
                 phone: {
-                    country_code: intacctInvoice.BILLTO.PHONE1,
+                    country_code: intacctInvoice.BILLTO.PHONE1 ? "1" : undefined,
                     national_number: intacctInvoice.BILLTO.PHONE1,
                 },
             }],

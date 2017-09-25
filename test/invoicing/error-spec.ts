@@ -198,6 +198,7 @@ tape("createInvoiceSync method failure should", async (t) => {
 tape("refundInvoicesSync method failure should", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
     invoicing.server = new hapi.Server();
     const intacctInvoices = [{ id: "test" }, { id: "ok" }];
 
