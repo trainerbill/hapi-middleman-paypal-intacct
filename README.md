@@ -14,7 +14,26 @@ Environment variables control the configuration of this plugin.  The table below
 
 ## Variables required by all functionality
 
-##### INTACCT_SENDER_ID
+<div id="required"></div>
+<script>
+    var requiredVariables = [
+        {
+            name: "INTACCT_SENDER_ID",
+            default: "undefined",
+            required: "true"
+        },
+        {
+            name: "INTACCT_SENDER_PASSWORD",
+            default: "undefined",
+            required: "true"
+        }
+    ]
+    requiredVariables.forEach(function (variable) {
+        document.getElementById("required").appendChild(document.createElement("h4").appendChild(document.createTextNode(variable.name)));
+    });
+</script>
+
+##### 
 Intacct Sender ID credential.  Given by Intacct<br/>
 **Default: undefined**<br/>
 **Required: true**<br/>
