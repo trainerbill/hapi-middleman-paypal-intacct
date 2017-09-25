@@ -2,6 +2,7 @@ import * as hapi from "hapi";
 import * as joi from "joi";
 import * as later from "later";
 import {
+    IBillingInfo,
     IInvoice,
     IInvoiceItem,
     invoiceBillingInfoSchema,
@@ -13,31 +14,14 @@ import { HapiIntacctInvoicing } from "./intacct";
 
 export * from "./intacct";
 
-export interface IInvoicingMerchant {
-    address: {
-        city: string;
-        country_code: string;
-        line1: string;
-        postal_code: string;
-        state: string;
-    };
-    business_name: string;
-    email: string;
-    first_name?: string;
-    last_name?: string;
-    phone: {
-        country_code: string;
-        national_number: string;
-    };
-}
-
 export interface IInvoicingOptions {
-    autogenerate: boolean;
     cron: {
         create?: {
+            auto: boolean;
             latertext: string;
         };
         refund?: {
+            auto: boolean;
             latertext: string;
         };
     };
@@ -47,8 +31,9 @@ export interface IInvoicingOptions {
             [key: string]: string;
         };
     };
-    merchant: IInvoicingMerchant;
+    merchant: IBillingInfo;
     reminderDays?: number;
+    startDate: string;
 }
 
 // TODO: Remove in favor of class static
@@ -114,12 +99,15 @@ export class HapiPayPalIntacctInvoicing {
         // Remove undefined
         options = JSON.parse(JSON.stringify(options));
         const optionsSchema = joi.object().keys({
-            autogenerate: joi.boolean().required(),
             cron: joi.object().keys({
                 create: joi.object().keys({
+                    auto: joi.boolean().default(true)
+                            .error(new Error("Invalid INTACCT_INVOICE_CREATE_AUTO environment variable")),
                     latertext: joi.string().default("every 1 hour"),
                 }).optional(),
                 refund: joi.object().keys({
+                    auto: joi.boolean().default(true)
+                            .error(new Error("Invalid INTACCT_INVOICE_REFUND_AUTO environment variable")),
                     latertext: joi.string().default("every 1 day"),
                 }).optional(),
             }),
@@ -129,6 +117,8 @@ export class HapiPayPalIntacctInvoicing {
                 default: joi.string().required(),
             }).optional(),
             reminderDays: joi.number().default(15),
+            startDate: joi.string().regex(/\d{1,2}\/\d{1,2}\/\d{4}/).required()
+                        .error(new Error("Invalid INTACCT_INVOICE_START_DATE environment variable")),
         });
         const validate = joi.validate(options, optionsSchema);
         if (validate.error) {
@@ -250,7 +240,12 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async refundInvoicesSync() {
-        const query = `RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')`;
+        // tslint:disable-next-line:max-line-length
+        let query = process.env.INTACCT_INVOICE_REFUND_QUERY || `RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')`;
+        if (!this.options.cron.refund.auto) {
+            query += ` AND PAYPALINVOICING = 'T'`;
+        }
+        query += ` AND WHENCREATED > '${this.options.startDate}'`;
         const invoices = await this.intacct.query(query);
         for (const invoice of invoices) {
             try {
@@ -284,10 +279,11 @@ export class HapiPayPalIntacctInvoicing {
     public async createInvoiceSync() {
         // TODO.  Do something about WHENCREATED
         // tslint:disable-next-line:max-line-length
-        let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0) AND WHENCREATED > '8/1/2017'`;
-        if (!this.options.autogenerate && !process.env.INTACCT_INVOICE_QUERY) {
+        let query = process.env.INTACCT_INVOICE_CREATE_QUERY || `RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0)`;
+        if (!this.options.cron.create.auto) {
             query += ` AND PAYPALINVOICING = 'T'`;
         }
+        query += ` AND WHENCREATED > '${this.options.startDate}'`;
 
         const invoices = await Promise.all([
             this.intacct.query(query, ["RECORDNO", "RECORDID"]),
@@ -403,7 +399,7 @@ export class HapiPayPalIntacctInvoicing {
                 first_name: intacctInvoice.BILLTO.FIRSTNAME,
                 last_name: intacctInvoice.BILLTO.LASTNAME,
                 phone: {
-                    country_code: intacctInvoice.BILLTO.PHONE1 ? "1" : undefined,
+                    country_code: intacctInvoice.BILLTO.PHONE1,
                     national_number: intacctInvoice.BILLTO.PHONE1,
                 },
             }],
@@ -419,7 +415,7 @@ export class HapiPayPalIntacctInvoicing {
             shipping_info: {
                 address: {
                     city: intacctInvoice.SHIPTO.MAILADDRESS.CITY,
-                    country_code: intacctInvoice.SHIPTO.MAILADDRESS.COUNTRYCODE || "US",
+                    country_code: intacctInvoice.SHIPTO.MAILADDRESS.COUNTRYCODE,
                     line1: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS1,
                     line2: intacctInvoice.SHIPTO.MAILADDRESS.ADDRESS2,
                     postal_code: intacctInvoice.SHIPTO.MAILADDRESS.ZIP,
@@ -431,11 +427,7 @@ export class HapiPayPalIntacctInvoicing {
             },
             tax_inclusive: true,
         };
-        /*
-        if (!paypalInvoice.payment_term && !paypalInvoice.payment_term.due_date) {
 
-        }
-        */
         return paypalInvoice;
     }
 

@@ -31,24 +31,24 @@ Environment variables control the configuration of this plugin.  The table below
 | Name | Description | Values  | Default | Required |
 | ------------- |-----------------------:| -----:| -----:| -----:|
 | PAYPAL_MERCHANT_EMAIL | PayPal Merchant Email.  This is required to be the email address associated with your REST client id. | email address | undefined | true |
-| PAYPAL_MERCHANT_FIRST_NAME | Biller first name that shows up on invoice | string | undefined | false |
-| PAYPAL_MERCHANT_LAST_NAME | Biller last name that shows up on invoice | string | undefined | false |
-| PAYPAL_MERCHANT_BUSINESS_NAME | Biller Business name that shows up on invoice | string | undefined | false |
-| PAYPAL_MERCHANT_PHONE_COUNTRY_CODE | Country code of biller phone number that shows up on invoice | number | 1 | false |
-| PAYPAL_MERCHANT_PHONE_NUMBER | Phone number of biller that shows up on invoice | number | undefined | false |
+| PAYPAL_INVOICE_MERCHANT_FIRST_NAME | Biller first name that shows up on invoice | string | undefined | false |
+| PAYPAL_INVOICE_MERCHANT_LAST_NAME | Biller last name that shows up on invoice | string | undefined | false |
+| PAYPAL_INVOICE_MERCHANT_BUSINESS_NAME | Biller Business name that shows up on invoice | string | undefined | false |
+| PAYPAL_INVOICE_MERCHANT_PHONE_COUNTRY_CODE | Country code of biller phone number that shows up on invoice | number | 1 | false |
+| PAYPAL_INVOICE_MERCHANT_PHONE_NUMBER | Phone number of biller that shows up on invoice | number | undefined | false |
+| PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE1 | Biller street that shows up on invoice | string | undefined | false |
+| PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE2 | Biller additional street that shows up on invoice | string | undefined | Required if any other address info is present |
+| PAYPAL_INVOICE_MERCHANT_ADDRESS_CITY | Biller city that shows up on invoice | string | undefined | Required if any other address info is present |
+| PAYPAL_INVOICE_MERCHANT_ADDRESS_STATE | State of biller that shows up on invoice | string | undefined | Required if any other address info is present |
+| PAYPAL_INVOICE_MERCHANT_COUNTRY_POSTAL_CODE | Postal code of biller that shows up on invoice | string | undefined | Required if any other address info is present |
+| INTACCT_INVOICE_CREATE_QUERY | Override the default intacct query for invoices to create. | string | "RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0)" | false |
+| INTACCT_INVOICE_CREATE_AUTO | Controls automatic creation of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field | string | true | true |
+| INTACCT_INVOICE_CREATE_LATER | Controls the cron job for creating invoices. | string: anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example) | every 1 hour | true |
+| INTACCT_INVOICE_REFUND_QUERY | Override the default intacct query for invoices to refund. | string | "RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')" | false |
+| INTACCT_INVOICE_REFUND_AUTO | Controls automatic refunding of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field | string | true | true |
+| INTACCT_INVOICE_REFUND_LATER | Controls the cron job for creating invoices. | string: anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example) | every 1 day | true |
+| INTACCT_INVOICE_PAYMENT_DEFAULT_ACCOUNT | The default Intacct account id to submit payments against.  If a currency account is not setup it will automatically submit payments to this account. | string | undefined | true |
+| INTACCT_INVOICE_PAYMENT_USD_ACCOUNT | The intacct account to submit payments of USD to. | string | undefined | false |
+| INTACCT_INVOICE_START_DATE | Sets the date to start picking up invoices.  Set this to your go live date. | string: '8/24/2017' | undefined | true |
 
-=Dennis
-=Doctor
-=ACME
-=1
-=4082564877
-PAYPAL_MERCHANT_ADDRESS_LINE1=2211 North First St
-PAYPAL_MERCHANT_ADDRESS_CITY=San Jose
-PAYPAL_MERCHANT_COUNTRY_STATE=CA
-PAYPAL_MERCHANT_COUNTRY_POSTAL_CODE=95131
-PAYPAL_MERCHANT_COUNTRY_CODE=US
-PAYPAL_WEBHOOK_HOSTNAME=https://middleman-test-trainerbill.c9users.io/paypal/webhooks/listen
-INVOICING_AUTO=true
-HAPI_DEBUG=true
-GOOD_HTTP_URL=https://middleman-test-trainerbill.c9users.io
-INVOICE_PAYMENT_DEFAULT_ACCOUNT=Suntrust
+
