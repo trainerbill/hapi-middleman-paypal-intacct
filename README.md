@@ -24,7 +24,7 @@ Environment variables control the configuration of this plugin.  The table below
 | PAYPAL_CLIENT_ID | PayPal REST API Client ID | string | undefined | true |
 | PAYPAL_CLIENT_SECRET | PayPal REST API Client Secred | string | undefined | true |
 | PAYPAL_MODE | PayPal Environment | "sandbox" or "production" | undefined | true |
-| PAYPAL_WEBHOOK_HOSTNAME | URL to receive PayPal Webhooks. Must be https | URL | the default route is /paypal/webhooks/listen.  Ex:  https://yourhostname.com/paypal/webhooks/listen | true |
+| PAYPAL_WEBHOOK_HOSTNAME | URL to receive PayPal Webhooks. Must be https | URL | Hostname + "/paypal/webhooks/listen" | true |
 
 
 ## Invoicing Variables
