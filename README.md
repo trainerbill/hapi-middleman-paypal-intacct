@@ -12,17 +12,22 @@ Hapi Middleman module to integrate between Intacct and PayPal.  This package is 
 # Environment Variables
 Environment variables control the configuration of this plugin.  The table below lists the environment variables and their functionality.
 
-## Variable required by all functionality
+## Variables required by all functionality
 
-### INTACCT_SENDER_ID
-Intacct Sender ID credential.  Given by Intacct
-**Default: undefined**
-**Required: true**
+##### INTACCT_SENDER_ID
+Intacct Sender ID credential.  Given by Intacct<br/>
+**Default: undefined**<br/>
+**Required: true**<br/>
+
+##### INTACCT_SENDER_PASSWORD
+Intacct Sender Password credential.  Given by Intacct<br/>
+**Default: undefined**<br/>
+**Required: true**<br/>
 
 | Name | Description | Values  | Default | Required |
 | ------------- |-----------------------:| -----:| -----:| -----:|
-| INTACCT_SENDER_ID |  | string | undefined | true |
-| INTACCT_SENDER_PASSWORD | Intacct Sender Password credential.  Given by Intacct  string | undefined | true |
+
+|  | Intacct Sender Password credential.  Given by Intacct  string | undefined | true |
 | INTACCT_USER_ID | Intacct User ID credential. From Intacct | string | undefined | true |
 | INTACCT_USER_PASSWORD | Intacct User Password. From Intacct | string | undefined | true |
 | INTACCT_COMPANY_ID | Intacct Company ID. From Intacct | string | undefined | true |
