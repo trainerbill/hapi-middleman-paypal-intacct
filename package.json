@@ -19,7 +19,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "coverage": "nyc tape test/**/*-spec.ts dotenv_config_path=./test/.env | tap-spec && nyc report",
+    "coverage": "nyc tape test/**/*-spec.ts dotenv_config_path=.env.test | tap-spec && nyc report",
     "clean": "rimraf lib coverage",
     "lint": "tslint --project tsconfig.json --force --format verbose \"src/**/*.ts\"",
     "build": "yarn run clean && yarn run lint && echo Using TypeScript && tsc --version && tsc --pretty",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "hapi-intacct": "^0.0.20",
-    "hapi-paypal": "^0.0.79",
+    "hapi-paypal": "^0.0.80",
     "later": "^1.2.0"
   },
   "devDependencies": {

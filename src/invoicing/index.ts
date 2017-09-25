@@ -111,6 +111,8 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     set options(options) {
+        // Remove undefined
+        options = JSON.parse(JSON.stringify(options));
         const optionsSchema = joi.object().keys({
             autogenerate: joi.boolean().required(),
             cron: joi.object().keys({
@@ -288,7 +290,7 @@ export class HapiPayPalIntacctInvoicing {
         }
 
         const invoices = await Promise.all([
-            this.intacct.query(query, ["RECORDNO", "RECORDID", "PAYPALINVOICEID"]),
+            this.intacct.query(query, ["RECORDNO", "RECORDID"]),
             this.paypal.invoice.search({ status: ["SENT", "UNPAID"] }),
         ]);
 
