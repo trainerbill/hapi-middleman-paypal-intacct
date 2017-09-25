@@ -114,7 +114,8 @@ export class HapiPayPalIntacctInvoicing {
             merchant: invoiceBillingInfoSchema.required(),
             paymentaccounts: joi.object().keys({
                 currencies: joi.object().default({}),
-                default: joi.string().required(),
+                default: joi.string().required()
+                            .error(new Error("Invalid INTACCT_INVOICE_PAYMENT_DEFAULT_ACCOUNT environment variable")),
             }).optional(),
             reminderDays: joi.number().default(15),
             startDate: joi.string().regex(/\d{1,2}\/\d{1,2}\/\d{4}/).required()
