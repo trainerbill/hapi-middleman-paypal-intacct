@@ -10,9 +10,10 @@
 Hapi Middleman module to integrate between Intacct and PayPal.  This package is meant to be installed with the [generator application](https://github.com/trainerbill/generator-hapi-middleman) but can be installed manually as well.
 
 # Environment Variables
-Environment variables control the configuration of this plugin.  The table below lists the environment variables and their functionality.
+Environment variables control the configuration of this plugin.
 
 ## Required Variables
+Required environment variables for **ALL** functionality.
 
 #### INTACCT_SENDER_ID
 Intacct Sender ID credential.  Given by Intacct<br/>
@@ -46,6 +47,7 @@ URL to receive PayPal Webhooks. Must be https.  The def<br/>
 
 
 ## Required Invoicing Variables
+Required environment variables for invoicing functionality
 
 #### PAYPAL_INVOICE_MERCHANT_EMAIL
 PayPal Merchant Email.  This is required to be the email address associated with your REST client id.<br/>
@@ -57,6 +59,7 @@ The default Intacct account id to submit payments against.  If a currency accoun
 Sets the date to start picking up invoices.  Set this to your go live date.  valid dates are MM/DD/YYYY
 
 ## Optional Invoicing Variables
+Optional environment variables for invoicing functionality
 
 #### PAYPAL_INVOICE_MERCHANT_FIRST_NAME
 Biller first name that shows up on invoice
