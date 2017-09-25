@@ -14,10 +14,15 @@ Environment variables control the configuration of this plugin.  The table below
 
 ## Variable required by all functionality
 
+### INTACCT_SENDER_ID
+Intacct Sender ID credential.  Given by Intacct
+**Default: undefined**
+**Required: true**
+
 | Name | Description | Values  | Default | Required |
 | ------------- |-----------------------:| -----:| -----:| -----:|
-| INTACCT_SENDER_ID | Intacct Sender ID credential.  Given by Intacct | string | undefined | true |
-| INTACCT_SENDER_PASSWORD | Intacct Sender Password credential.  Given by Intacct | string | undefined | true |
+| INTACCT_SENDER_ID |  | string | undefined | true |
+| INTACCT_SENDER_PASSWORD | Intacct Sender Password credential.  Given by Intacct  string | undefined | true |
 | INTACCT_USER_ID | Intacct User ID credential. From Intacct | string | undefined | true |
 | INTACCT_USER_PASSWORD | Intacct User Password. From Intacct | string | undefined | true |
 | INTACCT_COMPANY_ID | Intacct Company ID. From Intacct | string | undefined | true |
