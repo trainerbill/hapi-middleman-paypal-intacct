@@ -12,72 +12,108 @@ Hapi Middleman module to integrate between Intacct and PayPal.  This package is 
 # Environment Variables
 Environment variables control the configuration of this plugin.  The table below lists the environment variables and their functionality.
 
-## Variables required by all functionality
+## Required Variables
 
-<div id="required"></div>
-<script>
-    var requiredVariables = [
-        {
-            name: "INTACCT_SENDER_ID",
-            default: "undefined",
-            required: "true"
-        },
-        {
-            name: "INTACCT_SENDER_PASSWORD",
-            default: "undefined",
-            required: "true"
-        }
-    ]
-    requiredVariables.forEach(function (variable) {
-        document.getElementById("required").appendChild(document.createElement("h4").appendChild(document.createTextNode(variable.name)));
-    });
-</script>
-
-##### 
+#### INTACCT_SENDER_ID
 Intacct Sender ID credential.  Given by Intacct<br/>
-**Default: undefined**<br/>
-**Required: true**<br/>
 
-##### INTACCT_SENDER_PASSWORD
+#### INTACCT_SENDER_PASSWORD
 Intacct Sender Password credential.  Given by Intacct<br/>
-**Default: undefined**<br/>
-**Required: true**<br/>
 
-| Name | Description | Values  | Default | Required |
-| ------------- |-----------------------:| -----:| -----:| -----:|
+#### INTACCT_USER_ID
+Intacct User ID credential.  From Intacct users<br/>
 
-|  | Intacct Sender Password credential.  Given by Intacct  string | undefined | true |
-| INTACCT_USER_ID | Intacct User ID credential. From Intacct | string | undefined | true |
-| INTACCT_USER_PASSWORD | Intacct User Password. From Intacct | string | undefined | true |
-| INTACCT_COMPANY_ID | Intacct Company ID. From Intacct | string | undefined | true |
-| PAYPAL_CLIENT_ID | PayPal REST API Client ID | string | undefined | true |
-| PAYPAL_CLIENT_SECRET | PayPal REST API Client Secred | string | undefined | true |
-| PAYPAL_MODE | PayPal Environment | "sandbox" or "production" | undefined | true |
-| PAYPAL_WEBHOOK_HOSTNAME | URL to receive PayPal Webhooks. Must be https | URL | Hostname + "/paypal/webhooks/listen" | true |
+#### INTACCT_USER_PASSWORD
+Intacct User Password credential.  From Intacct users<br/>
+
+#### INTACCT_COMPANY_ID
+Intacct Company ID. From Intacct<br/>
+
+#### PAYPAL_CLIENT_ID
+PayPal REST API Client ID.  From developer.paypal.com<br/>
+
+#### PAYPAL_CLIENT_SECRET
+PayPal REST API Client Secret.  From Intacct users<br/>
+
+#### PAYPAL_MODE
+PayPal environment<br/>
+**Values: "sandbox" or "production"**<br/>
+
+#### PAYPAL_WEBHOOK_HOSTNAME
+URL to receive PayPal Webhooks. Must be https.  The def<br/>
+**Value: Add /paypal/webhooks/listen to your hostname.  Ex: https://example.com/paypal/webhooks/listen**<br/>
 
 
-## Invoicing Variables
-| Name | Description | Values  | Default | Required |
-| ------------- |-----------------------:| -----:| -----:| -----:|
-| PAYPAL_MERCHANT_EMAIL | PayPal Merchant Email.  This is required to be the email address associated with your REST client id. | email address | undefined | true |
-| PAYPAL_INVOICE_MERCHANT_FIRST_NAME | Biller first name that shows up on invoice | string | undefined | false |
-| PAYPAL_INVOICE_MERCHANT_LAST_NAME | Biller last name that shows up on invoice | string | undefined | false |
-| PAYPAL_INVOICE_MERCHANT_BUSINESS_NAME | Biller Business name that shows up on invoice | string | undefined | false |
-| PAYPAL_INVOICE_MERCHANT_PHONE_COUNTRY_CODE | Country code of biller phone number that shows up on invoice | number | 1 | false |
-| PAYPAL_INVOICE_MERCHANT_PHONE_NUMBER | Phone number of biller that shows up on invoice | number | undefined | false |
-| PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE1 | Biller street that shows up on invoice | string | undefined | false |
-| PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE2 | Biller additional street that shows up on invoice | string | undefined | Required if any other address info is present |
-| PAYPAL_INVOICE_MERCHANT_ADDRESS_CITY | Biller city that shows up on invoice | string | undefined | Required if any other address info is present |
-| PAYPAL_INVOICE_MERCHANT_ADDRESS_STATE | State of biller that shows up on invoice | string | undefined | Required if any other address info is present |
-| PAYPAL_INVOICE_MERCHANT_COUNTRY_POSTAL_CODE | Postal code of biller that shows up on invoice | string | undefined | Required if any other address info is present |
-| INTACCT_INVOICE_CREATE_QUERY | Override the default intacct query for invoices to create. | string | "RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0)" | false |
-| INTACCT_INVOICE_CREATE_AUTO | Controls automatic creation of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field | string | true | true |
-| INTACCT_INVOICE_CREATE_LATER | Controls the cron job for creating invoices. | string: anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example) | every 1 hour | true |
-| INTACCT_INVOICE_REFUND_QUERY | Override the default intacct query for invoices to refund. | string | "RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')" | false |
-| INTACCT_INVOICE_REFUND_AUTO | Controls automatic refunding of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field | string | true | true |
-| INTACCT_INVOICE_REFUND_LATER | Controls the cron job for creating invoices. | string: anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example) | every 1 day | true |
-| INTACCT_INVOICE_PAYMENT_DEFAULT_ACCOUNT | The default Intacct account id to submit payments against.  If a currency account is not setup it will automatically submit payments to this account. | string | undefined | true |
-| INTACCT_INVOICE_PAYMENT_USD_ACCOUNT | The intacct account to submit payments of USD to. | string | undefined | false |
-| INTACCT_INVOICE_START_DATE | Sets the date to start picking up invoices.  Set this to your go live date. | string: '8/24/2017' | undefined | true |
 
+## Required Invoicing Variables
+
+#### PAYPAL_INVOICE_MERCHANT_EMAIL
+PayPal Merchant Email.  This is required to be the email address associated with your REST client id.<br/>
+
+#### INTACCT_INVOICE_PAYMENT_DEFAULT_ACCOUNT
+The default Intacct account id to submit payments against.  If a currency account is not setup it will automatically submit payments to this account.
+
+#### INTACCT_INVOICE_START_DATE
+Sets the date to start picking up invoices.  Set this to your go live date.  valid dates are MM/DD/YYYY
+
+## Optional Invoicing Variables
+
+#### PAYPAL_INVOICE_MERCHANT_FIRST_NAME
+Biller first name that shows up on invoice
+
+#### PAYPAL_INVOICE_MERCHANT_LAST_NAME
+Biller last name that shows up on invoice
+
+#### PAYPAL_INVOICE_MERCHANT_BUSINESS_NAME
+Biller business name that shows up on invoice
+
+#### PAYPAL_INVOICE_MERCHANT_PHONE_COUNTRY_CODE
+Biller phone country code that shows up on invoice
+**Default: 1**
+
+#### PAYPAL_INVOICE_MERCHANT_PHONE_NUMBER
+Biller phone number that shows up on invoice
+
+#### PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE1
+Biller street address that shows up on invoice
+
+#### PAYPAL_INVOICE_MERCHANT_ADDRESS_LINE2
+Biller additional street address that shows up on invoice
+
+#### PAYPAL_INVOICE_MERCHANT_ADDRESS_CITY
+Biller city address that shows up on invoice
+
+#### PAYPAL_INVOICE_MERCHANT_ADDRESS_STATE
+Biller additional state address that shows up on invoice
+**2 character state**
+
+#### PAYPAL_INVOICE_MERCHANT_COUNTRY_POSTAL_CODE
+Biller zip code that shows up on invoice
+
+#### INTACCT_INVOICE_CREATE_QUERY
+Override the default intacct query for invoices to create.
+**Default: "RAWSTATE = 'A' AND (PAYPALINVOICESTATUS IS NULL OR PAYPALINVOICESTATUS NOT IN ('CANCELLED')) AND TOTALDUE NOT IN (0)"**
+
+#### INTACCT_INVOICE_CREATE_AUTO
+Controls automatic creation of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field
+**Default: true**
+
+#### INTACCT_INVOICE_CREATE_LATER
+Controls the cron job for creating invoices.  Anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example)
+**Default: "every 1 hour"**
+
+#### INTACCT_INVOICE_REFUND_QUERY
+Override the default intacct query for invoices to refund.
+**Default: "RAWSTATE = 'V' AND PAYPALINVOICESTATUS NOT IN ('REFUNDED', 'CANCELLED')"**
+
+#### INTACCT_INVOICE_REFUND_AUTO
+Controls automatic refunding of invoices.  If false it will require that the PAYPALINVOICING checkbox be checked on the Intacct Custom field
+**Default: true**
+
+#### INTACCT_INVOICE_REFUND_LATER
+Controls the cron job for refunding invoices.  Anything that can be parsed by [later package](https://bunkat.github.io/later/getting-started.html#example)
+**Default: "every 1 hour"**
+
+#### INTACCT_INVOICE_PAYMENT_USD_ACCOUNT
+he intacct account to submit payments of USD to.  If set then PayPal invoices of type USD will go to this intacct account.
 
