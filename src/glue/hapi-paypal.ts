@@ -5,27 +5,22 @@ import { hapiPayPalIntacctInvoicing } from "./invoicing";
 
 export const hapiPayPal = new HapiPayPal();
 
+hapiPayPal.routes.get("paypal_webhooks_listen").custom = async (request, reply, error, response) => {
+    if (error) {
+        return reply(boom.notFound(error.message));
+    }
+    try {
+        await hapiPayPalIntacctInvoicing.webhookHandler(request.payload);
+        return reply("GOT IT!");
+    } catch (err) {
+        // tslint:disable-next-line:max-line-length
+        request.server.log("error", `webhookEvent: ${JSON.stringify(request.payload)} | Error:${err.message}`);
+        return reply(boom.badRequest(err.message));
+    }
+};
+
 export const hapiPayPalOptions: IHapiPayPalOptions = {
-    routes: [
-        {
-            config: {
-                id: "paypal_webhooks_listen",
-            },
-            handler: async (request, reply, error, response) => {
-                if (error) {
-                    return reply(boom.notFound(error.message));
-                }
-                try {
-                    await hapiPayPalIntacctInvoicing.webhookHandler(request.payload);
-                    return reply("GOT IT!");
-                } catch (err) {
-                    // tslint:disable-next-line:max-line-length
-                    request.server.log("error", `webhookEvent: ${JSON.stringify(request.payload)} | Error:${err.message}`);
-                    return reply(boom.badRequest(err.message));
-                }
-            },
-        },
-    ],
+    routes: ["paypal_webhooks_listen"],
     sdk: {
         client_id: process.env.PAYPAL_CLIENT_ID,
         client_secret: process.env.PAYPAL_CLIENT_SECRET,
