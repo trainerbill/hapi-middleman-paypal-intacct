@@ -203,7 +203,6 @@ tape("refundInvoicesSync method failure should", async (t) => {
     const intacctInvoices = [{ id: "test" }, { id: "ok" }];
 
     // Stubs
-    const logStub = sandbox.stub(invoicing.server, "log");
     const intacctStub = sandbox.stub(invoicing.intacct, "query")
         .resolves(intacctInvoices);
     const refundStub = sandbox.stub(invoicing, "refundInvoiceSync")
@@ -214,7 +213,6 @@ tape("refundInvoicesSync method failure should", async (t) => {
     try {
         await invoicing.refundInvoicesSync();
         t.equal(refundStub.calledTwice, true, "call refundInvoiceSync twice");
-        t.equal(logStub.calledOnce, true, "call server log once");
     } catch (err) {
         t.fail(`should not throw error: ${err.message}`);
     }

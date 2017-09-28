@@ -219,7 +219,7 @@ tape("createInvoiceSync method success should", async (t) => {
         .withArgs(sinon.match.string, sinon.match.array)
         .resolves(intacctInvoices);
     const paypalInvoices = [{ id: "paypalid" }, { id: "paypalid1"}];
-    const paypalSearchStub = sandbox.stub(realPaypal.invoice, "search")
+    const paypalSearchStub = sandbox.stub(invoicing.paypal.invoice, "search")
         .resolves(paypalInvoices);
     const invoicingStub1 = sandbox.stub(invoicing, "syncIntacctToPayPal")
         .resolves(invoice);
@@ -266,10 +266,6 @@ tape("syncIntacctToPayPal method success", async (t) => {
             .withArgs(mockIntacctInvoicePosted.RECORDNO)
             .resolves(mockIntacctInvoicePosted);
 
-        const paypalSearchStub = sandbox.stub(invoicing.paypal.invoice, "search")
-            .withArgs({ number: mockIntacctInvoicePosted.RECORDID })
-            .resolves([]);
-
         const paypalCreateStub = sandbox.stub(invoicing.paypal.invoice.api, "create")
             .resolves({
                 body: mockPayPalInvoiceDraft,
@@ -280,7 +276,6 @@ tape("syncIntacctToPayPal method success", async (t) => {
         await invoicing.syncIntacctToPayPal(mockIntacctInvoicePosted);
 
         st.equal(intacctGetStub.calledOnce, true, "call intacct get with proper arguments");
-        st.equal(paypalSearchStub.calledOnce, true, "call paypal search with proper arguments");
         st.equal(paypalCreateStub.calledOnce, true, "call create on paypal invoice model");
         st.equal(paypalSendStub.calledOnce, true, "call send on invoice model");
         st.equal(paypalUpdateStub.called, false, "not call send on invoice model");
@@ -289,27 +284,28 @@ tape("syncIntacctToPayPal method success", async (t) => {
 
     t.test("draft invoice should", async (st) => {
         const invoice = new realPaypal.invoice(mockPayPalInvoiceDraft);
+        const intacctInvoice = {
+            ...mockIntacctInvoicePosted,
+            ...{
+                PAYPALINVOICEID: "testid",
+            },
+        };
         const intacctGetStub = sandbox.stub(invoicing.intacct, "get")
-            .withArgs(mockIntacctInvoicePosted.RECORDNO)
-            .resolves({
-                ...mockIntacctInvoicePosted,
-                ...{
-                    PAYPALINVOICEID: "testid",
-                },
-            });
+            .withArgs(intacctInvoice.RECORDNO)
+            .resolves(intacctInvoice);
 
-        const paypalSearchStub = sandbox.stub(invoicing.paypal.invoice, "search")
-            .resolves([invoice]);
+        const paypalGetStub = sandbox.stub(invoicing.paypal.invoice, "get")
+            .resolves(invoice);
 
         const paypalUpdateStub = sandbox.stub(invoicing.paypal.invoice.prototype, "update")
             .resolves();
         const paypalSendStub = sandbox.stub(invoicing.paypal.invoice.prototype, "send")
             .resolves();
 
-        await invoicing.syncIntacctToPayPal(mockIntacctInvoicePosted);
+        await invoicing.syncIntacctToPayPal(intacctInvoice);
 
         st.equal(intacctGetStub.calledOnce, true, "call intacct get with proper arguments");
-        st.equal(paypalSearchStub.calledOnce, true, "call paypal search with proper arguments");
+        st.equal(paypalGetStub.calledOnce, true, "call paypal get with proper arguments");
         st.equal(paypalUpdateStub.calledOnce, true, "call update on paypal invoice model");
         st.equal(paypalSendStub.calledOnce, true, "call send on paypal invoice model");
         sandbox.restore();
@@ -328,9 +324,11 @@ tape("syncPayPalToIntacct method success", async (t) => {
         const invoiceModel = new realPaypal.invoice(mockPayPalInvoiceSent);
         invoiceModel.model.reference = "TEST";
         // Stubs
+        const getStub = sandbox.stub(invoiceModel, "get").resolves();
         const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
         await invoicing.syncPayPalToIntacct(invoiceModel);
+        st.equal(getStub.calledOnce, true, "call paypal invoice get");
         st.equal(intacctStub.calledWith(invoiceModel.model.reference), true, "call intacct get with invoice RECORDNO");
         st.equal(remindStub.calledOnce, true, "call models remind method");
         sandbox.restore();
@@ -348,9 +346,11 @@ tape("syncPayPalToIntacct method success", async (t) => {
         const invoiceModel = new realPaypal.invoice(invoice);
         invoiceModel.model.reference = "TEST";
         // Stubs
+        const getStub = sandbox.stub(invoiceModel, "get").resolves();
         const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
         await invoicing.syncPayPalToIntacct(invoiceModel);
+        st.equal(getStub.calledOnce, true, "call paypal invoice get");
         st.equal(intacctStub.calledWith(invoiceModel.model.reference), true, "call intacct get with invoice RECORDNO");
         st.equal(remindStub.called, false, "not call models remind method");
         sandbox.restore();

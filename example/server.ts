@@ -1,4 +1,5 @@
 import * as glue from "glue";
+import * as good from "good";
 import * as hapi from "hapi";
 import { IInvoicingOptions} from "../";
 import {
@@ -21,6 +22,25 @@ export const manifest = {
         },
     ],
     registrations: [
+        {
+            plugin: {
+                options: {
+                    reporters: {
+                        console: [{
+                            args: [{
+                                log: "*",
+                                response: "*",
+                            }],
+                            module: "good-squeeze",
+                            name: "Squeeze",
+                        }, {
+                            module: "good-console",
+                        }, "stdout"],
+                    },
+                },
+                register: good.register,
+            },
+        },
         hapiIntacctGlueRegistration,
         hapiPayPalGlueRegistration,
         hapiPayPalIntacctInvoicingGlueRegistration,

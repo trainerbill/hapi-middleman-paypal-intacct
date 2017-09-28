@@ -15,7 +15,10 @@
                 "dotenv/config",
                 "./node_modules/.bin/tape",
                 "test/**/*-spec.ts",
-                "dotenv_config_path=.env.test"]
+                "dotenv_config_path=.env.test"],
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         },
         {
             "type": "node",
@@ -27,7 +30,10 @@
                 "dotenv/config",
                 "./node_modules/.bin/tape",
                 "${file}",
-                "dotenv_config_path=.env.test"]
+                "dotenv_config_path=.env.test"],
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         },
         {
             "type": "node",
@@ -37,7 +43,10 @@
             "runtimeArgs": [
                 "-r",
                 "dotenv/config",
-                "${workspaceRoot}/example/server.ts" ]
+                "${workspaceRoot}/example/server.ts" ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         }
     ]
 }

@@ -176,6 +176,10 @@ export class HapiPayPalIntacctInvoicing {
         if (invoice.status !== "PAID") {
             throw new Error("Invalid Status");
         }
+        if (!invoice.payments || invoice.payments.length < 1) {
+            // tslint:disable-next-line:max-line-length
+            throw new Error("No recorded PayPal Payments.  This should not happen and is most likely an issue with the paypal api.");
+        }
         // tslint:disable-next-line:max-line-length
         const account = this.options.paymentaccounts.currencies[invoice.total_amount.currency] || this.options.paymentaccounts.default;
         try {
@@ -250,6 +254,10 @@ export class HapiPayPalIntacctInvoicing {
         }
         query += ` AND WHENCREATED > '${this.options.startDate}'`;
         const invoices = await this.intacct.query(query);
+        this.server.log(
+            ["info", "paypal-intacct", "invoice", "refundInvoicesSync"],
+            { count: invoices.length, invoices: invoices.map((inv: any) => inv.RECORDID)},
+        );
         for (const invoice of invoices) {
             try {
                 await this.refundInvoiceSync(invoice);
@@ -290,9 +298,14 @@ export class HapiPayPalIntacctInvoicing {
         query += ` AND WHENCREATED > '${this.options.startDate}'`;
 
         const invoices = await Promise.all([
-            this.intacct.query(query, ["RECORDNO", "RECORDID"]),
+            this.intacct.query(query, ["RECORDNO", "RECORDID", "PAYPALINVOICEID"]),
             this.paypal.invoice.search({ status: ["SENT", "UNPAID"] }),
         ]);
+
+        this.server.log(
+            ["info", "paypal-intacct", "invoice", "createInvoiceSync"],
+            { count: invoices[0].length, invoices: invoices[0].map((inv: any) => inv.RECORDID)},
+        );
 
         for (const invoice of invoices[0]) {
             const intacctUpdate: any = {
@@ -331,10 +344,10 @@ export class HapiPayPalIntacctInvoicing {
 
         const invoices = await Promise.all([
             this.intacct.get(invoice.RECORDNO),
-            this.paypal.invoice.search({ number: invoice.RECORDID }),
+            invoice.PAYPALINVOICEID ? this.paypal.invoice.get(invoice.PAYPALINVOICEID) : null,
         ]);
         const intacctInvoice = invoices[0];
-        let paypalInvoice = invoices[1][0];
+        let paypalInvoice = invoices[1];
 
         if (!paypalInvoice) {
             paypalInvoice = new this.paypal.invoice(this.toPaypalInvoice(intacctInvoice));
@@ -383,6 +396,8 @@ export class HapiPayPalIntacctInvoicing {
             this.server.log(["info", "paypal-intacct", "invoice", "cancel"], invoice.model);
         } else {
             if (this.options.reminderDays) {
+                // TODO: This is needed because invoice.search does not return enough metadata... ugh.
+                await invoice.get();
                 const now = new Date();
                 const lastSend = invoice.model.metadata.first_sent_date  || invoice.model.metadata.last_sent_date;
                 const lastReminder = new Date(lastSend);
@@ -447,19 +462,21 @@ export class HapiPayPalIntacctInvoicing {
 
     public toPayPalLineItems(arrInvoiceItems: any) {
 
-        const arrPPInvItems: IInvoiceItem[] = [];
+        if (!Array.isArray(arrInvoiceItems)) {
+            arrInvoiceItems = [arrInvoiceItems];
+        }
 
+        const arrPPInvItems: IInvoiceItem[] = [];
         if (arrInvoiceItems.length > 0) {
             for (const item of arrInvoiceItems) {
-                const ritem = {
+                arrPPInvItems.push({
                     name: item.ITEMNAME,
                     quantity: 1,
                     unit_price: {
                         currency: item.CURRENCY,
                         value: item.AMOUNT,
                     },
-                };
-                arrPPInvItems.push(ritem);
+                });
             }
         }
         return arrPPInvItems;
