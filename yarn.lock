@@ -172,6 +172,10 @@ ansi-styles@^3.1.0:
   dependencies:
     color-convert "^1.9.0"
 
+app-root-path@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/app-root-path/-/app-root-path-2.0.1.tgz#cd62dcf8e4fd5a417efc664d2e5b10653c651b46"
+
 append-transform@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/append-transform/-/append-transform-0.4.0.tgz#d76ebf8ca94d276e247a36bad44a4b74ab611991"
@@ -528,6 +532,13 @@ coveralls@^2.0.0:
     minimist "1.2.0"
     request "2.79.0"
 
+cross-env@^5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-5.0.5.tgz#4383d364d9660873dd185b398af3bfef5efffef3"
+  dependencies:
+    cross-spawn "^5.1.0"
+    is-windows "^1.0.0"
+
 cross-spawn@^4:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-4.0.2.tgz#7b9247621c23adfdd3856004a823cbe397424d41"
@@ -535,7 +546,7 @@ cross-spawn@^4:
     lru-cache "^4.0.1"
     which "^1.2.9"
 
-cross-spawn@^5.0.1:
+cross-spawn@^5.0.1, cross-spawn@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-5.1.0.tgz#e8bd0efee58fcff6f8f94510a0a554bbfa235449"
   dependencies:
@@ -609,6 +620,12 @@ detect-indent@^4.0.0:
 diff@^3.1.0, diff@^3.2.0:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.3.1.tgz#aa8567a6eed03c531fc89d3f711cd0e5259dec75"
+
+dot-env-json@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/dot-env-json/-/dot-env-json-0.0.2.tgz#0e911d0ed373347fbc943bfbdb0482b0b5ef6a6b"
+  dependencies:
+    app-root-path "^2.0.1"
 
 dotenv@^4.0.0:
   version "4.0.0"
@@ -931,10 +948,12 @@ hapi-intacct@^0.0.20:
     intacct-api "^0.2.1"
     joi "^10.6.0"
 
-hapi-paypal@^0.0.83:
-  version "0.0.83"
-  resolved "https://registry.yarnpkg.com/hapi-paypal/-/hapi-paypal-0.0.83.tgz#a92b405bb09a35647942c8ea6b88cd7367222cd4"
+hapi-paypal@^0.0.95:
+  version "0.0.95"
+  resolved "https://registry.yarnpkg.com/hapi-paypal/-/hapi-paypal-0.0.95.tgz#3d14d140c9a578ad129e614a9c936006196b6780"
   dependencies:
+    cross-env "^5.0.5"
+    dot-env-json "^0.0.2"
     joi "^11.1.1"
     paypal-rest-api "^0.0.51"
     us "^2.0.0"
@@ -1245,6 +1264,10 @@ is-typedarray@~1.0.0:
 is-utf8@^0.2.0:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
+
+is-windows@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/is-windows/-/is-windows-1.0.1.tgz#310db70f742d259a16a369202b51af84233310d9"
 
 isarray@0.0.1:
   version "0.0.1"
