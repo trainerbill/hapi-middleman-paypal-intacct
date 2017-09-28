@@ -40,7 +40,7 @@ export const hapiPayPalOptions: IHapiPayPalOptions = {
                 name: "INVOICING.INVOICE.CANCELLED",
             },
         ],
-        url: process.env.PAYPAL_WEBHOOK_HOSTNAME,
+        url: `https://${process.env.HOSTNAME}${process.env.PAYPAL_WEBHOOK_ROUTE}`,
     },
 };
 
