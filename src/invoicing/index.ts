@@ -134,6 +134,7 @@ export class HapiPayPalIntacctInvoicing {
         this.intacct.setServer(this.server);
         this.paypal = server.plugins["hapi-paypal"].paypal;
         this.options = options;
+        this.server.log(["info", "paypal-intacct", "options"], this.options);
         return this.init()
                 .then(() => next())
                 .catch((err) => {
@@ -193,7 +194,8 @@ export class HapiPayPalIntacctInvoicing {
                 }],
             };
 
-            return await this.intacct.createPayment(payment);
+            await this.intacct.createPayment(payment);
+            this.server.log(["info", "paypal-intacct", "invoice", "payment"], payment);
             // tslint:enable:object-literal-sort-keys
         } catch (err) {
             // tslint:disable-next-line:max-line-length
@@ -266,6 +268,7 @@ export class HapiPayPalIntacctInvoicing {
             for (const payment of paypalInvoice.model.payments) {
                 try {
                     await this.paypal.sale.api.refund(payment.transaction_id);
+                    this.server.log(["info", "paypal-intacct", "invoice", "refund"], invoice.model);
                 } catch (err) {
                     intacctInvoice.PAYPALERROR += err.message;
                 }
@@ -336,9 +339,11 @@ export class HapiPayPalIntacctInvoicing {
         if (!paypalInvoice) {
             paypalInvoice = new this.paypal.invoice(this.toPaypalInvoice(intacctInvoice));
             await paypalInvoice.create();
+            this.server.log(["info", "paypal-intacct", "invoice", "create"], paypalInvoice.model);
         } else {
             try {
                 await paypalInvoice.update(this.toPaypalInvoice(intacctInvoice));
+                this.server.log(["info", "paypal-intacct", "invoice", "update"], paypalInvoice.model);
             } catch (err) {
                 if (err.message !== "Invalid Status") {
                     throw err;
@@ -348,6 +353,7 @@ export class HapiPayPalIntacctInvoicing {
 
         try {
             await paypalInvoice.send();
+            this.server.log(["info", "paypal-intacct", "invoice", "send"], paypalInvoice.model);
         } catch (err) {
             if (err.message !== "Invalid Status") {
                 throw err;
@@ -366,19 +372,26 @@ export class HapiPayPalIntacctInvoicing {
     }
 
     public async syncPayPalToIntacct(invoice: InvoiceModel) {
+        if (!invoice.model.reference) {
+            await invoice.cancel();
+            this.server.log(["info", "paypal-intacct", "invoice", "cancel"], invoice.model);
+            return;
+        }
         const intacctInvoice = await this.intacct.get(invoice.model.reference);
         if (!intacctInvoice) {
             await invoice.cancel();
+            this.server.log(["info", "paypal-intacct", "invoice", "cancel"], invoice.model);
         } else {
-            if (invoice.model.metadata.last_sent_date && this.options.reminderDays) {
-                const lastReminder = new Date(invoice.model.metadata.last_sent_date);
-                const reminder = new Date(lastReminder.setDate(lastReminder.getDate() + this.options.reminderDays));
+            if (this.options.reminderDays) {
                 const now = new Date();
+                const lastSend = invoice.model.metadata.first_sent_date  || invoice.model.metadata.last_sent_date;
+                const lastReminder = new Date(lastSend);
+                const reminder = new Date(lastReminder.setDate(lastReminder.getDate() + this.options.reminderDays));
+
                 if (now > reminder) {
                     await invoice.remind();
+                    this.server.log(["info", "paypal-intacct", "invoice", "remind"], invoice.model);
                 }
-            } else {
-                throw new Error("No last_sent_date property.");
             }
         }
     }

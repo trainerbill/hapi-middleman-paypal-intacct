@@ -47,6 +47,7 @@ tape("register method success should", async (t) => {
 tape("validateAccounts method success should", async (st) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
     invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
     const intacctMock = sandbox.mock(invoicing.intacct)
         .expects("listAccounts")
@@ -70,6 +71,7 @@ tape("validateAccounts method success should", async (st) => {
 tape("validateKeys method success should", async (st) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
     const intacctMock = sandbox.mock(invoicing.intacct)
         .expects("inspect")
         .once()
@@ -87,6 +89,7 @@ tape("validateKeys method success should", async (st) => {
 tape("webhookHandler method success", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
 
     t.test("invoice refund event success should", async (st) => {
         const event = {
@@ -159,6 +162,7 @@ tape("webhookHandler method success", async (t) => {
 tape("refundInvoicesSync method success should", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
     invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
     const intacctStub = sandbox.stub(invoicing.intacct, "query")
         .withArgs(sinon.match.string)
@@ -173,6 +177,7 @@ tape("refundInvoicesSync method success should", async (t) => {
 tape("refundInvoiceSync method success should", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
     invoicing.paypal = realPaypal;
     const invoice = new realPaypal.invoice(mockPaypalInvoicePaid);
     const invoiceStub = sandbox.stub(invoice, "get").resolves();
@@ -184,26 +189,26 @@ tape("refundInvoiceSync method success should", async (t) => {
         .withArgs(invoice.model.payments[0].transaction_id)
         .resolves();
     const intacctStub = sandbox.stub(invoicing.intacct, "update")
-        .withArgs(
-            mockIntacctRefundedInvoice.RECORDNO,
-            {
-                ...invoicing.updateInacctInvoiceWithPayPalModel({}, invoice),
-                PAYPALERROR: "",
-            },
-        )
         .resolves();
     await invoicing.refundInvoiceSync(mockIntacctRefundedInvoice);
 
     t.equal(paypalInvoiceGetStub.calledOnce, true, "call paypal.invoice.get with intacct PAYPALINVOICEID");
     t.equal(paypalPaymentRefundStub.calledOnce, true, "call paypal.invoice.api.refund with intacct RECORDNO");
     t.equal(invoiceStub.calledOnce, true, "call invoice.get to update model");
-    t.equal(intacctStub.calledOnce, true, "call intacct update with proper arguments");
+    t.equal(intacctStub.withArgs(
+        mockIntacctRefundedInvoice.RECORDNO,
+        {
+            ...invoicing.updateInacctInvoiceWithPayPalModel({}, invoice),
+            PAYPALERROR: "",
+        },
+    ).calledOnce, true, "call intacct update with proper arguments");
     sandbox.restore();
 });
 
 tape("createInvoiceSync method success should", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
     invoicing.paypal = realPaypal;
     invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
     process.env.INTACCT_INVOICE_CREATE_QUERY = "testy";
@@ -251,6 +256,7 @@ tape("createInvoiceSync method success should", async (t) => {
 tape("syncIntacctToPayPal method success", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
     invoicing.paypal = realPaypal;
     invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
 
@@ -314,11 +320,13 @@ tape("syncIntacctToPayPal method success", async (t) => {
 tape("syncPayPalToIntacct method success", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
+    invoicing.server = new hapi.Server();
     invoicing.paypal = realPaypal;
     invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
 
     t.test("reminder should", async (st) => {
         const invoiceModel = new realPaypal.invoice(mockPayPalInvoiceSent);
+        invoiceModel.model.reference = "TEST";
         // Stubs
         const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
@@ -338,6 +346,7 @@ tape("syncPayPalToIntacct method success", async (t) => {
             },
         };
         const invoiceModel = new realPaypal.invoice(invoice);
+        invoiceModel.model.reference = "TEST";
         // Stubs
         const remindStub = sandbox.stub(invoiceModel, "remind").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves({ RECORDNO: "TEST" });
@@ -349,6 +358,7 @@ tape("syncPayPalToIntacct method success", async (t) => {
 
     t.test("cancel should", async (st) => {
         const invoiceModel = new realPaypal.invoice(mockPayPalInvoiceSent);
+        invoiceModel.model.reference = "TEST";
         // Stubs
         const cancelStub = sandbox.stub(invoiceModel, "cancel").resolves();
         const intacctStub = sandbox.stub(invoicing.intacct, "get").resolves();
@@ -363,8 +373,8 @@ tape("syncPayPalToIntacct method success", async (t) => {
 tape("init method success", async (t) => {
     const sandbox = sinon.sandbox.create();
     const invoicing = new index.HapiPayPalIntacctInvoicing();
-    invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
     invoicing.server = new hapi.Server();
+    invoicing.options = hapiPayPalIntacctInvoicingPlugin.options;
 
     t.test("with all options should", async (st) => {
         // Stubs
