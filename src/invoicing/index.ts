@@ -268,7 +268,7 @@ export class HapiPayPalIntacctInvoicing {
             for (const payment of paypalInvoice.model.payments) {
                 try {
                     await this.paypal.sale.api.refund(payment.transaction_id);
-                    this.server.log(["info", "paypal-intacct", "invoice", "refund"], invoice.model);
+                    this.server.log(["info", "paypal-intacct", "invoice", "refund"], invoice);
                 } catch (err) {
                     intacctInvoice.PAYPALERROR += err.message;
                 }
