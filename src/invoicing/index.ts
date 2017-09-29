@@ -344,10 +344,15 @@ export class HapiPayPalIntacctInvoicing {
 
         const invoices = await Promise.all([
             this.intacct.get(invoice.RECORDNO),
-            invoice.PAYPALINVOICEID ? this.paypal.invoice.get(invoice.PAYPALINVOICEID) : null,
+            invoice.PAYPALINVOICEID ?
+                this.paypal.invoice.get(invoice.PAYPALINVOICEID) :
+                this.paypal.invoice.search({ number: invoice.RECORDID}),
         ]);
         const intacctInvoice = invoices[0];
-        let paypalInvoice = invoices[1];
+
+        let paypalInvoice = (Array.isArray(invoices[1])) ?
+            invoices[1].length > 0 ? invoices[1][0].get() : null :
+            invoices[1];
 
         if (!paypalInvoice) {
             paypalInvoice = new this.paypal.invoice(this.toPaypalInvoice(intacctInvoice));
