@@ -351,7 +351,7 @@ export class HapiPayPalIntacctInvoicing {
         const intacctInvoice = invoices[0];
 
         let paypalInvoice = (Array.isArray(invoices[1])) ?
-            invoices[1].length > 0 ? invoices[1][0].get() : null :
+            invoices[1].length > 0 ? await invoices[1][0].get() : null :
             invoices[1];
 
         if (!paypalInvoice) {
