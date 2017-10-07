@@ -134,18 +134,13 @@ This screenshot lists them along with their respective types:
 ![list of custom field with types][cf1]
 
 ## Creating Custom Fields in Intacct
-1. Click on the Platform services tab
-![click on platform services][cf2]
+1. Click on the **Platform services** tab, then under it find and click on **Custom Fields** ![][cf2]
 
-2. Click on **Custom Fields**
-![click on Custom Fields][cf3]
+2. Click on the **Add** button ![click on the Add button][cf3]
 
-3. Click on the **Add** button
-![click on the Add button][cf4]
+3. The following 4 steps will appear. Refer the below table for values at each step, for the custom fields we will end up creating.
 
-4. The following 4 steps will appear. Refer the below table values at each step, for the custom fields we will end up creating.
-
-#### Step 1: Choose Object to Extend.  
+#### Step 1: Choose Object to Extend  
  In our case this will always be **invoice**
 
 #### Step 2: Choose Field Data Type  
@@ -182,11 +177,11 @@ This screenshot lists them along with their respective types:
 Hit **Done** button to save the custom field
 
 Now whenever you successfuly create a new invoice in Intacct and view its details, you should see the following custom fields we just created:
-![inew_nvoice_custom_fields][cf5]
+![new_nvoice_custom_fields][cf5]
  
 
-[cf1]: ./docs/images/intacct_custom_fields_list.png
-[cf2]: ./docs/images/intacct_platform_services.png
-[cf3]: ./docs/images/intacct_custom_fields_link.png
-[cf4]: ./docs/images/intacct_custom_fields_add_link.png
-[cf5]: ./docs/images/intacct_new_invoice_custom_fields.png
+[cf1]: https://raw.githubusercontent.com/arjunshukla/hapi-middleman-paypal-intacct/master/docs/images/intacct_custom_fields/1-intacct_custom_fields_list.png
+[cf2]: https://raw.githubusercontent.com/arjunshukla/hapi-middleman-paypal-intacct/master/docs/images/intacct_custom_fields/2-intacct_platform_services_custom_fields_link.png
+[cf3]: https://raw.githubusercontent.com/arjunshukla/hapi-middleman-paypal-intacct/master/docs/images/intacct_custom_fields/3-intacct_custom_fields_add_link.png
+[cf4]: https://raw.githubusercontent.com/arjunshukla/hapi-middleman-paypal-intacct/master/docs/images/intacct_custom_fields/
+[cf5]: https://raw.githubusercontent.com/arjunshukla/hapi-middleman-paypal-intacct/master/docs/images/intacct_custom_fields/6-intacct_new_invoice_custom_fields.png
