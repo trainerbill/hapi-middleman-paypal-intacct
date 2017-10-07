@@ -120,3 +120,73 @@ Controls the cron job for refunding invoices.  Anything that can be parsed by [l
 #### INTACCT_INVOICE_PAYMENT_USD_ACCOUNT
 he intacct account to submit payments of USD to.  If set then PayPal invoices of type USD will go to this intacct account.<br/>
 
+# Intacct Custom Fields
+Intacct custom fields let you add your own fields on top of the existing Intacct object fields.  
+For the purpose of this integration, we just need to add custom fields for the invoice object.  
+Following are the custom fields you'll require to create under your Intacct account and link to invoice object:
+* PayPal Invoice ID
+* PAYPALERROR
+* PAYPALINVOICEURL
+* PAYPALINVOICESTATUS
+* PAYPALINVOICING
+
+This screenshot lists them along with their respective types:
+![list of custom field with types][cf1]
+
+## Creating Custom Fields in Intacct
+1. Click on the Platform services tab
+![click on platform services][cf2]
+
+2. Click on **Custom Fields**
+![click on Custom Fields][cf3]
+
+3. Click on the **Add** button
+![click on the Add button][cf4]
+
+4. The following 4 steps will appear. Refer the below table values at each step, for the custom fields we will end up creating.
+
+#### Step 1: Choose Object to Extend.  
+ In our case this will always be **invoice**
+
+#### Step 2: Choose Field Data Type  
+  
+| Custom Field Name       | Data Type |  
+| ----------------------- |----------:|  
+| **PayPal Invoice ID**   | Text      |  
+| **PAYPALERROR**         | Text Area |  
+| **PAYPALINVOICEURL**    | URL       |  
+| **PAYPALINVOICESTATUS** | Text      |  
+| **PAYPALINVOICING**     | Check Box |  
+
+
+#### Step 3: Choose Text Area Field Characteristics  
+
+| Custom Field Name       | Label Value         | Number of rows to display / Lenght / Default Value | Field ID            | Description           |
+| ----------------------- |:-------------------:|:--------------------------------------------------:|:-------------------:|:---------------------:|
+| **PayPal Invoice ID**   | PayPal Invoice ID   | 24                                                 | PAYPALINVOICEID     | PayPal Invoice ID     |
+| **PAYPALERROR**         | PAYPALERROR         | 10                                                 | PAYPALERROR         |                       |
+| **PAYPALINVOICEURL**    | PAYPALINVOICEURL    | -                                                  | PAYPALINVOICEURL    |                       |
+| **PAYPALINVOICESTATUS** | PAYPALINVOICESTATUS | 20                                                 | PAYPALINVOICESTATUS |                       |
+| **PAYPALINVOICING**     | PAYPALINVOICING     | false                                              | PAYPALINVOICING     | Send a PayPal Invoice |
+
+#### Step 4: Choose Deployment Options  
+
+| Custom Field Name       | Field is required | Field is hidden | Field is inactive | Field Set  | Show on page  |
+| ----------------------- |:-----------------:|:---------------:|:-----------------:|:----------:|:-------------:|
+| **PayPal Invoice ID**   | false             | false           | false             |            | Custom Fields |
+| **PAYPALERROR**         | false             | false           | false             |            | Custom Fields |
+| **PAYPALINVOICEURL**    | false             | false           | false             |            | Custom Fields |
+| **PAYPALINVOICESTATUS** | false             | false           | false             |            | Custom Fields |
+| **PAYPALINVOICING**     | false             | false           | false             |            | Custom Fields |
+
+Hit **Done** button to save the custom field
+
+Now whenever you successfuly create a new invoice in Intacct and view its details, you should see the following custom fields we just created:
+![inew_nvoice_custom_fields][cf5]
+ 
+
+[cf1]: ./docs/images/intacct_custom_fields_list.png
+[cf2]: ./docs/images/intacct_platform_services.png
+[cf3]: ./docs/images/intacct_custom_fields_link.png
+[cf4]: ./docs/images/intacct_custom_fields_add_link.png
+[cf5]: ./docs/images/intacct_new_invoice_custom_fields.png
