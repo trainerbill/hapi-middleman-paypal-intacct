@@ -7,7 +7,7 @@
 
 
 # paypal-integrations-intacct
-Hapi module to integrate between Intacct and PayPal.  This package is meant to be installed with the [generator application](https://github.com/trainerbill/generator-hapi-middleman) but can be installed manually as well.
+Hapi module to integrate between Intacct and PayPal.  This package is meant to be installed with the [paypal integrations generator application](https://github.com/trainerbill/generator-paypal-integrations) but can be installed manually as well.
 
 # Environment Variables
 Environment variables control the configuration of this plugin.
