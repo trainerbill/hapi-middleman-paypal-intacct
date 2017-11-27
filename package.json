@@ -1,6 +1,6 @@
 {
   "name": "paypal-integrations-intacct",
-  "version": "0.0.83",
+  "version": "0.0.84",
   "description": "Integration between paypal and intacct using hapi.",
   "license": "MIT",
   "repository": "",
