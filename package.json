@@ -1,7 +1,7 @@
 {
-  "name": "hapi-middleman-paypal-intacct",
+  "name": "paypal-integrations-intacct",
   "version": "0.0.82",
-  "description": "hapi-middleman module for integrating paypal with intacct",
+  "description": "Integration between paypal and intacct using hapi.",
   "license": "MIT",
   "repository": "",
   "author": "Andrew Throener",
