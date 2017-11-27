@@ -1,13 +1,13 @@
-[![Build Status](https://travis-ci.org/trainerbill/hapi-middleman-paypal-intacct.svg?branch=master)](https://travis-ci.org/trainerbill/hapi-middleman-paypal-intacct)
-[![Coverage Status](https://coveralls.io/repos/github/trainerbill/hapi-middleman-paypal-intacct/badge.svg?branch=master)](https://coveralls.io/github/trainerbill/hapi-middleman-paypal-intacct?branch=master)
-[![npm version](https://badge.fury.io/js/hapi-middleman-paypal-intacct.svg)](https://badge.fury.io/js/hapi-middleman-paypal-intacct)
-[![Dependency Status](https://david-dm.org/trainerbill/hapi-middleman-paypal-intacct.svg)](https://david-dm.org/trainerbill/hapi-middleman-paypal-intacct)
-[![devDependency Status](https://david-dm.org/trainerbill/hapi-middleman-paypal-intacct/dev-status.svg)](https://david-dm.org/trainerbill/hapi-middleman-paypal-intacct#info=devDependencies)
+[![Build Status](https://travis-ci.org/trainerbill/paypal-integrations-intacct.svg?branch=master)](https://travis-ci.org/trainerbill/paypal-integrations-intacct)
+[![Coverage Status](https://coveralls.io/repos/github/trainerbill/paypal-integrations-intacct/badge.svg?branch=master)](https://coveralls.io/github/trainerbill/paypal-integrations-intacct?branch=master)
+[![npm version](https://badge.fury.io/js/paypal-integrations-intacct.svg)](https://badge.fury.io/js/paypal-integrations-intacct)
+[![Dependency Status](https://david-dm.org/trainerbill/paypal-integrations-intacct.svg)](https://david-dm.org/trainerbill/paypal-integrations-intacct)
+[![devDependency Status](https://david-dm.org/trainerbill/paypal-integrations-intacct/dev-status.svg)](https://david-dm.org/trainerbill/paypal-integrations-intacct#info=devDependencies)
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
 
-# hapi-middleman-paypal-intacct
-Hapi Middleman module to integrate between Intacct and PayPal.  This package is meant to be installed with the [generator application](https://github.com/trainerbill/generator-hapi-middleman) but can be installed manually as well.
+# paypal-integrations-intacct
+Hapi module to integrate between Intacct and PayPal.  This package is meant to be installed with the [generator application](https://github.com/trainerbill/generator-hapi-middleman) but can be installed manually as well.
 
 # Environment Variables
 Environment variables control the configuration of this plugin.
